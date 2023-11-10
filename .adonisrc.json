@@ -16,6 +16,7 @@
   "providers": [
     "./providers/AppProvider",
     "./providers/Database/GremlinProvider",
+    "./providers/Authentication/CognitoProvider",
     "@adonisjs/core",
     "@adonisjs/session",
     "@adonisjs/view",
