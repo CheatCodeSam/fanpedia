@@ -19,7 +19,15 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+import g from '@ioc:Database/Gremlin'
 
 Route.get('/', async ({ view }) => {
   return view.render('welcome')
+})
+
+Route.get('/neptune', async ({}) => {
+  console.log(g)
+  const john = await g.addV('person').property('name', 'John').next()
+  g.V().has('postId', 'test').property('name', 'Carson').property('Hello', 'world').next()
+  return 'Vertex added:' + john.value
 })

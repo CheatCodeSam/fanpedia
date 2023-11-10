@@ -15,6 +15,7 @@
   "preloads": ["./start/routes", "./start/kernel"],
   "providers": [
     "./providers/AppProvider",
+    "./providers/Database/GremlinProvider",
     "@adonisjs/core",
     "@adonisjs/session",
     "@adonisjs/view",

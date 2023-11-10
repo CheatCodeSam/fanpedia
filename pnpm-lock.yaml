@@ -55,6 +55,9 @@ devDependencies:
   '@symfony/webpack-encore':
     specifier: 4.1.1
     version: 4.1.1(@babel/core@7.23.3)(@babel/preset-env@7.23.3)(eslint@8.53.0)(postcss@8.4.31)(typescript@4.6.4)(webpack-cli@4.10.0)(webpack@5.89.0)
+  '@types/gremlin':
+    specifier: ^3.6.6
+    version: 3.6.6
   '@types/proxy-addr':
     specifier: ^2.0.3
     version: 2.0.3
@@ -2300,6 +2303,10 @@ packages:
     dependencies:
       '@types/minimatch': 5.1.2
       '@types/node': 20.9.0
+    dev: true
+
+  /@types/gremlin@3.6.6:
+    resolution: {integrity: sha512-Js28tNBc1bXorMA+JEni811AKNlkPknGDM/ZF+hSopt3WWINB/G1TO5PU0YktFMJbsnqxStP1rLVdSguWM6D6g==}
     dev: true
 
   /@types/he@1.2.3:
