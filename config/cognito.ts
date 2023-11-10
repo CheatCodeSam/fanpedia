@@ -1,7 +1,7 @@
 // import Env from '@ioc:Adonis/Core/Env'
 
 export default {
-  //   client_id: Env.get('COGNITO_CLIENT_ID'),
+  client_id: '5m6kd9qbilhnfi817vljs8msgp',
   //   client_secret: Env.get('COGNITO_CLIENT_SECRET'),
   //   callback_url: Env.get('COGNITO_CALLBACK_URL'),
   //   logout_url: Env.get('COGNITO_LOGOUT_URL'),
