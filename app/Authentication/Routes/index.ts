@@ -59,5 +59,11 @@ Route.group(() => {
     response.redirect(authUrl)
   }).as('login')
 
-  Route.get('/logout', async ({}) => {}).as('logout')
+  Route.get('/exit', async ({ response, request }) => {
+    const signOutUrl = `https://${config.domain}.auth.${config.region}.amazoncognito.com/logout?client_id=${config.client_id}&logout_uri=${config.logout_url}`
+    const sessionId: string = request.cookie('oidc_session')
+    if (sessionId) await Redis.del(`auth:session:${sessionId}`)
+    response.clearCookie('oidc_session')
+    response.redirect(signOutUrl)
+  }).as('logout')
 }).as('authentication')
