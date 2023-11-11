@@ -30,7 +30,6 @@ export default class Authentication {
           await AuthenticationService.validateToken(newToken, 'access')
           session.accessToken = newToken
           await Redis.set(`auth:session:${sessionId}`, JSON.stringify(session))
-          next()
         } else {
           throw new Error('Refresh Token Expired')
         }
