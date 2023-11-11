@@ -8,10 +8,12 @@ import g from '@ioc:Database/Gremlin'
 import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class Authentication {
-  public async handle({ request, response }: HttpContextContract, next: () => Promise<void>) {
+  public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
+    const { request, response } = ctx
+    ctx.user = null
     const sessionId = request.cookie('oidc_session')
     if (!sessionId) {
-      response.status(401).send('No session cookie found')
+      await next()
       return
     }
     try {
@@ -39,12 +41,11 @@ export default class Authentication {
         cognitoId: user.value.properties.cognito_id[0].value,
         userVertex: user.value.id,
       }
+      ctx.user = userContext
     } catch (error) {
       Logger.warn(error)
       await Redis.del(`auth:session:${sessionId}`)
       response.clearCookie('oidc_session')
-      response.status(401).send('Authentication failed, please log in again')
-      return
     }
     await next()
   }

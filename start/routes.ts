@@ -23,8 +23,9 @@ import g from '@ioc:Database/Gremlin'
 
 import 'App/Authentication/Routes'
 
-Route.get('/', async ({ view }) => {
-  return view.render('welcome')
+Route.get('/', async ({ view, user }) => {
+  return user ? user.username : 'Not logged in'
+  // return view.render('welcome')
 }).middleware('authenticated')
 
 Route.get('/neptune', async ({}) => {
