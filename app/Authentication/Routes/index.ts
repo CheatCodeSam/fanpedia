@@ -4,21 +4,41 @@ import AuthenticationService from '@ioc:Authentication/Cognito'
 import TokenService from '../Service/TokenService'
 import Redis from '@ioc:Adonis/Addons/Redis'
 import * as crypto from 'node:crypto'
+import { Session } from '../Types'
+import g from '@ioc:Database/Gremlin'
+
+import { process } from 'gremlin'
 
 Route.group(() => {
   Route.get('/callback', async ({ request, response }) => {
     const { code } = request.qs()
     if (!code) {
-      response.status(400).send('No code provided')
+      response.status(400).send('No authorization code provided.')
       return
     }
     try {
       const token = await TokenService.getToken(code as string)
       await AuthenticationService.validateToken(token.access_token, 'access')
       const identity = await AuthenticationService.validateToken(token.id_token, 'id')
-      const tokens = {
-        sub: identity.payload.sub,
-        username: identity.payload['cognito:username'],
+
+      await g
+        .V()
+        .has('user', 'cognito_id', identity.payload.sub)
+        .fold()
+        .coalesce(
+          process.statics.unfold(),
+          process.statics
+            .addV('user')
+            .property('username', identity.payload['cognito:username'])
+            .property('cognito_id', identity.payload.sub)
+            .property('email', identity.payload.email)
+            .property('email_verified', identity.payload.email_verified)
+        )
+        .next()
+
+      const tokens: Session = {
+        sub: identity.payload.sub as string,
+        username: identity.payload['cognito:username'] as string,
         accessToken: token.access_token,
         refreshToken: token.refresh_token,
       }
@@ -27,6 +47,7 @@ Route.group(() => {
       response.cookie('oidc_session', sessionId, {})
       response.redirect('/')
     } catch (error: any) {
+      console.log(error)
       response.status(500).send('error')
     }
   }).as('callback')
