@@ -21,6 +21,8 @@
 import Route from '@ioc:Adonis/Core/Route'
 import g from '@ioc:Database/Gremlin'
 
+import 'App/Authentication/Routes'
+
 Route.get('/', async ({ view }) => {
   return view.render('welcome')
 })
