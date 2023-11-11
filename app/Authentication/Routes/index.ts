@@ -2,6 +2,8 @@ import Route from '@ioc:Adonis/Core/Route'
 import config from 'Config/cognito'
 import AuthenticationService from '@ioc:Authentication/Cognito'
 import TokenService from '../Service/TokenService'
+import Redis from '@ioc:Adonis/Addons/Redis'
+import * as crypto from 'node:crypto'
 
 Route.group(() => {
   Route.get('/callback', async ({ request, response }) => {
@@ -15,13 +17,14 @@ Route.group(() => {
       await AuthenticationService.validateToken(token.access_token, 'access')
       const identity = await AuthenticationService.validateToken(token.id_token, 'id')
       const tokens = {
+        sub: identity.payload.sub,
         username: identity.payload['cognito:username'],
         accessToken: token.access_token,
         refreshToken: token.refresh_token,
       }
-      // const doc = await db.insertAsync(tokens)
-      // res.cookie('oidc_session', doc._id, { signed: true })
-      console.log(tokens)
+      const sessionId = crypto.randomUUID()
+      await Redis.set(`auth:session:${sessionId}`, JSON.stringify(tokens))
+      response.cookie('oidc_session', sessionId, {})
       response.redirect('/')
     } catch (error: any) {
       response.status(500).send('error')

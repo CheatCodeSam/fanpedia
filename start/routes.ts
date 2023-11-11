@@ -25,7 +25,7 @@ import 'App/Authentication/Routes'
 
 Route.get('/', async ({ view }) => {
   return view.render('welcome')
-})
+}).middleware('authenticated')
 
 Route.get('/neptune', async ({}) => {
   console.log(g)
