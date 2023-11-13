@@ -34,10 +34,15 @@ export default class Authentication {
           throw new Error('Refresh Token Expired')
         }
       }
-      const user = await g.V().has('user', 'cognito_id', session.sub).next()
+      const user = await g
+        .V()
+        .has('user', 'cognito_id', session.sub)
+        .valueMap('username', 'cognito_id')
+        .next()
+
       const userContext: User = {
-        username: user.value.properties.username[0].value,
-        cognitoId: user.value.properties.cognito_id[0].value,
+        username: user.value.get('username')[0],
+        cognitoId: user.value.get('cognito_id')[0],
         userVertex: user.value.id,
       }
       ctx.user = userContext
