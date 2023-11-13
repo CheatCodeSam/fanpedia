@@ -6,6 +6,7 @@ import TokenService from '../Service/TokenService'
 import * as jose from 'jose'
 import g from '@ioc:Database/Gremlin'
 import Logger from '@ioc:Adonis/Core/Logger'
+import { process } from 'gremlin'
 
 export default class Authentication {
   public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
@@ -37,13 +38,12 @@ export default class Authentication {
       const user = await g
         .V()
         .has('user', 'cognito_id', session.sub)
-        .valueMap('username', 'cognito_id')
+        .elementMap('username', 'cognito_id')
         .next()
-
       const userContext: User = {
-        username: user.value.get('username')[0],
-        cognitoId: user.value.get('cognito_id')[0],
-        userVertex: user.value.id,
+        cognitoId: user.value.get('cognito_id'),
+        username: user.value.get('username'),
+        userVertex: user.value.get('id'),
       }
       ctx.user = userContext
     } catch (error) {
