@@ -38,12 +38,12 @@ export default class Authentication {
       const user = await g
         .V()
         .has('user', 'cognito_id', session.sub)
-        .elementMap('username', 'cognito_id')
+        .elementMap('id', 'username', 'cognito_id')
         .next()
       const userContext: User = {
         cognitoId: user.value.get('cognito_id'),
         username: user.value.get('username'),
-        userVertex: user.value.get('id'),
+        userVertex: user.value.get(process.t.id),
       }
       ctx.user = userContext
     } catch (error) {
