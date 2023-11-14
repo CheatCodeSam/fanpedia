@@ -10,12 +10,11 @@ import { process } from 'gremlin'
 
 export default class Authentication {
   public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
-    const { request, response } = ctx
+    const { request, response, view } = ctx
     ctx.user = null
     const sessionId = request.cookie('oidc_session')
     if (!sessionId) {
-      await next()
-      return
+      return next()
     }
     try {
       const sessionStr = await Redis.get(`auth:session:${sessionId}`)
@@ -45,12 +44,13 @@ export default class Authentication {
         username: user.value.get('username'),
         userVertex: user.value.get(process.t.id),
       }
+      view.share({ user: userContext })
       ctx.user = userContext
     } catch (error) {
       Logger.warn(error)
       await Redis.del(`auth:session:${sessionId}`)
       response.clearCookie('oidc_session')
     }
-    await next()
+    return next()
   }
 }
