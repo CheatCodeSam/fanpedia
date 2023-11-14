@@ -58,6 +58,22 @@ Route.group(() => {
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', Object.fromEntries(retval.value))
   }).as('show')
+
+  Route.get('wiki/:wiki/page/:page/edit', async ({ params, response, user, view }) => {
+    const { wiki, page } = params
+    const wikiPage = await g
+      .V()
+      .has('wiki', 'slug', wiki)
+      .out()
+      .has('page', 'slug', page)
+      .elementMap()
+      .next()
+    if (!wikiPage) return response.status(400).send('Wiki does not exists')
+    if (!user) return response.redirect().toRoute('authentication.login')
+    return view.render('Page/edit', { page: Object.fromEntries(wikiPage.value) })
+  }).as('edit')
+
+  Route.post('wiki/:wiki/page/:page', async ({}) => {}).as('update')
 })
   .as('page')
   .middleware('authenticated')

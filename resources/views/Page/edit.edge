@@ -1,0 +1,33 @@
+@layout('Layouts/main')
+
+
+@section('body')
+
+    <form action="{{ route(('page.store'), {'wiki': request.params().wiki }) }}" method="POST">     
+    <div>
+        <p>
+          <label for="title"> </label>
+        </p>
+
+        <input type="text" value="{{page.title}}" name="title" />
+      </div>
+    <div>
+        <p>
+          <label for="slug"> Page slug </label>
+        </p>
+
+        <input type="text" name="slug" value="{{page.slug}}" disabled />
+      </div>
+
+      <div>
+        <p>
+          <label for="body"> Page body </label>
+        </p>
+        <textarea name="body" cols="30" rows="10">{{ page.body }}</textarea>
+      </div>
+
+      <div>
+        <button type="submit">Page Wiki</button>
+      </div>
+    </form>
+@end
