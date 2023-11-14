@@ -48,8 +48,21 @@ Route.group(() => {
       .to('a')
       .next()
 
-    return payload
+    return response.redirect().toRoute('page.show', { wiki: wiki, page: payload.slug })
   }).as('store')
+
+  Route.get('wiki/:wiki/page/:page', async ({ params, response }) => {
+    const { wiki, page } = params
+    const retval = await g
+      .V()
+      .has('wiki', 'slug', wiki)
+      .out()
+      .has('page', 'slug', page)
+      .elementMap()
+      .next()
+    if (!retval.value) return response.status(404).send('Page not found.')
+    return Object.fromEntries(retval.value)
+  }).as('show')
 })
   .as('page')
   .middleware('authenticated')
