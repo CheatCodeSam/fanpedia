@@ -33,7 +33,13 @@ export default class WikisController {
     return payload
   }
 
-  public async show({}: HttpContextContract) {}
+  public async show({ params, view }: HttpContextContract) {
+    const { wiki } = params
+    const pages = await g.V().has('wiki', 'slug', wiki).out('of').elementMap().fold().next()
+    const pagesobj = pages.value.map((p) => Object.fromEntries(p))
+    console.log(pagesobj)
+    return view.render('Wiki/show', { pages: pagesobj })
+  }
 
   public async edit({}: HttpContextContract) {}
 

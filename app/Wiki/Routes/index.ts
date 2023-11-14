@@ -10,6 +10,10 @@ Route.group(() => {
     const { default: WikisController } = await import('../Controller/WikisController')
     return new WikisController().store(ctx)
   }).as('store')
+  Route.get(':wiki', async (ctx) => {
+    const { default: WikisController } = await import('../Controller/WikisController')
+    return new WikisController().show(ctx)
+  }).as('show')
 })
   .as('wiki')
   .prefix('wiki')

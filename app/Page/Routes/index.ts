@@ -17,15 +17,12 @@ Route.group(() => {
     const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
     if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
     if (!user) return response.redirect().toRoute('authentication.login')
-
     const pageSchema = schema.create({
       title: schema.string({ trim: true }, [rules.minLength(3)]),
       body: schema.string({ trim: true }, [rules.maxLength(155)]),
       slug: schema.string({ trim: true }, [rules.regex(/^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/)]),
     })
-
     const payload = await request.validate({ schema: pageSchema })
-
     const doesPageAlreadyExists = await g
       .V()
       .has('wiki', 'slug', wiki)
@@ -33,7 +30,6 @@ Route.group(() => {
       .has('page', 'slug', payload.slug)
       .hasNext()
     if (doesPageAlreadyExists) return response.status(400).send('Page already exists')
-
     await g
       .addV('page')
       .as('a')
@@ -47,11 +43,10 @@ Route.group(() => {
       .from_(process.statics.V().has('wiki', 'slug', wiki))
       .to('a')
       .next()
-
     return response.redirect().toRoute('page.show', { wiki: wiki, page: payload.slug })
   }).as('store')
 
-  Route.get('wiki/:wiki/page/:page', async ({ params, response }) => {
+  Route.get('wiki/:wiki/page/:page', async ({ params, response, view }) => {
     const { wiki, page } = params
     const retval = await g
       .V()
@@ -61,7 +56,7 @@ Route.group(() => {
       .elementMap()
       .next()
     if (!retval.value) return response.status(404).send('Page not found.')
-    return Object.fromEntries(retval.value)
+    return view.render('Page/show', Object.fromEntries(retval.value))
   }).as('show')
 })
   .as('page')

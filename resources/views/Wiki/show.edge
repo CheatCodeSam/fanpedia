@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Page</title>
+  @entryPointScripts('app')
+</head>
+<body>
+    @each(page in pages)
+        <li>
+            <a href="{{ route(('page.show'), {'wiki': request.params().wiki, 'page': page.slug }) }}">  {{ page.title }}</a>
+        </li>
+    @end
+    <a href="{{ route(('page.create'), {'wiki': request.params().wiki }) }}">Create new page</a>
+</body>
+
+</html>
