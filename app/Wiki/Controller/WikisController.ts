@@ -36,8 +36,7 @@ export default class WikisController {
   public async show({ params, view }: HttpContextContract) {
     const { wiki } = params
     const pages = await g.V().has('wiki', 'slug', wiki).out('of').elementMap().fold().next()
-    const pagesobj = pages.value.map((p) => Object.fromEntries(p))
-    console.log(pagesobj)
+    const pagesobj = pages.value.map((p: Map<any, any>) => Object.fromEntries(p))
     return view.render('Wiki/show', { pages: pagesobj })
   }
 

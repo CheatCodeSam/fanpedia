@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Page</title>
-  @entryPointStyles('app')
-  @entryPointScripts('app')
-</head>
-<body>
+@layout('Layouts/main')
+
+
+@section('body')
+
     <form action="{{ route(('page.store'), {'wiki': request.params().wiki }) }}" method="POST">     
     <div>
         <p>
@@ -36,6 +31,4 @@
         <button type="submit">Page Wiki</button>
       </div>
     </form>
-  </body>
-
-</html>
+@end
