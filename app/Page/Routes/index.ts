@@ -1,15 +1,55 @@
 import Route from '@ioc:Adonis/Core/Route'
 import g from '@ioc:Database/Gremlin'
+import { process } from 'gremlin'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 Route.group(() => {
-  Route.get('wiki/:wiki/page/create', async ({ user, params, response }) => {
+  Route.get('wiki/:wiki/page/create', async ({ user, params, response, view }) => {
+    const { wiki } = params
+    const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
+    if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
+    if (!user) return response.redirect().toRoute('authentication.login')
+    return view.render('Page/create')
+  }).as('create')
+
+  Route.post('wiki/:wiki/page', async ({ request, user, params, response }) => {
     const { wiki } = params
     const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
     if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
     if (!user) return response.redirect().toRoute('authentication.login')
 
-    return 'ready'
-  }).as('create')
+    const pageSchema = schema.create({
+      title: schema.string({ trim: true }, [rules.minLength(3)]),
+      body: schema.string({ trim: true }, [rules.maxLength(155)]),
+      slug: schema.string({ trim: true }, [rules.regex(/^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/)]),
+    })
+
+    const payload = await request.validate({ schema: pageSchema })
+
+    const doesPageAlreadyExists = await g
+      .V()
+      .has('wiki', 'slug', wiki)
+      .out()
+      .has('page', 'slug', payload.slug)
+      .hasNext()
+    if (doesPageAlreadyExists) return response.status(400).send('Page already exists')
+
+    await g
+      .addV('page')
+      .as('a')
+      .property('title', payload.title)
+      .property('slug', payload.slug)
+      .property('body', payload.body)
+      .addE('created')
+      .from_(process.statics.V(user.userVertex))
+      .to('a')
+      .addE('of')
+      .from_(process.statics.V().has('wiki', 'slug', wiki))
+      .to('a')
+      .next()
+
+    return payload
+  }).as('store')
 })
   .as('page')
   .middleware('authenticated')
