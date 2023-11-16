@@ -1,0 +1,17 @@
+@layout('Layouts/main')
+
+@section('body')
+    @each(revision in revisions)
+        <li>
+            <a href="{{ 
+                route(
+                    'page.show',
+                    { wiki: request.params().wiki, page: request.params().page },
+                    { qs: { revision: revision.id } }
+                )
+            }}">
+                {{ revision.body }}
+            </a>
+        </li>
+    @end
+@end

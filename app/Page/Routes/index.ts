@@ -82,7 +82,6 @@ Route.group(() => {
       .by(process.statics.elementMap('title', 'slug', 'date'))
       .by(process.statics.out('main').elementMap('body', 'date', 'status'))
       .next()
-    console.log(retval.value)
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', {
       page: Object.fromEntries(retval.value.get('pageInfo')),
@@ -103,7 +102,6 @@ Route.group(() => {
       .by(process.statics.out('main').elementMap('body', 'date', 'status'))
       .by(process.statics.out('main').in_('edited').elementMap('username'))
       .next()
-    console.log(wikiPage)
     if (!wikiPage) return response.status(400).send('Wiki does not exists')
     return view.render('Page/edit', {
       page: Object.fromEntries(wikiPage.value.get('pageInfo')),
@@ -114,8 +112,7 @@ Route.group(() => {
 
   Route.post('wiki/:wiki/page/:page', async ({ params, response, user, request }) => {
     const { wiki, page } = params
-    // What if wiki/page doesnt exist?
-    console.log('hi')
+    //TODO What if wiki/page doesnt exist?
     if (!user) return response.status(400).send('no user')
     const editPageSchema = schema.create({
       body: schema.string({ trim: true }, []),
@@ -127,7 +124,7 @@ Route.group(() => {
       .addV('revision')
       .as('a')
       .property('date', now)
-      .property('status', 'approved')
+      .property('status', 'pending')
       .property('body', payload.body)
       // get page vertex as b
       .V()
@@ -135,15 +132,9 @@ Route.group(() => {
       .out('page_of')
       .has('page', 'slug', page)
       .as('b')
-      // drop main from previous revision
-      .sideEffect(process.statics.select('b').outE('main').drop())
       // Get the user vertex as c
       .V(user.userVertex)
       .as('c')
-      // revision is new main revision
-      .addE('main')
-      .from_('b')
-      .to('a')
       // revision is edit of page
       .addE('edit_of')
       .from_('a')
@@ -156,6 +147,29 @@ Route.group(() => {
 
     return response.redirect().toRoute('page.show', { wiki: wiki, page: page })
   }).as('update')
+
+  Route.get('wiki/:wiki/page/:page/revisions', async ({ params, response, user, view }) => {
+    if (!user) return response.redirect().toRoute('authentication.login')
+    const { wiki, page } = params
+    //TODO does page and wiki exist?
+
+    const x = await g
+      .V()
+      .has('wiki', 'slug', wiki)
+      .out('page_of')
+      .has('page', 'slug', page)
+      .in_('edit_of')
+      .has('revision', 'status', 'pending')
+      .elementMap()
+      .fold()
+      .next()
+
+    const retVal = x.value.map((map: Map<any, any>) => Object.fromEntries(map))
+    console.log(retVal)
+    return view.render('Page/revisions', {
+      revisions: retVal,
+    })
+  }).as('revisions')
 })
   .as('page')
   .middleware('authenticated')
