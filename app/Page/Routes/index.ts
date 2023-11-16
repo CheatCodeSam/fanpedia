@@ -47,14 +47,15 @@ Route.group(() => {
       .to('a')
       // page is a page of the wiki
       .addE('page_of')
-      .from_(process.statics.V().has('wiki', 'slug', wiki))
-      .to('a')
+      .from_('a')
+      .to(process.statics.V().has('wiki', 'slug', wiki))
       // Create a new vertex for the page's initial revision
       .addV('revision')
       .as('c')
       .property('body', payload.body)
       .property('date', now)
       .property('status', 'approved')
+      .property('comment', 'Initial revision')
       // Create a 'main' edge to denote this is the current revision of the page
       .addE('main')
       .from_('a')
@@ -77,7 +78,7 @@ Route.group(() => {
     let val = g
       .V()
       .has('wiki', 'slug', wiki)
-      .out('page_of')
+      .in_('page_of')
       .has('page', 'slug', page)
       .project('pageInfo', 'mainRevision')
       .by(process.statics.elementMap('title', 'slug', 'date'))
@@ -96,13 +97,15 @@ Route.group(() => {
     })
   }).as('show')
 
-  Route.get('wiki/:wiki/page/:page/edit', async ({ params, response, user, view }) => {
+  Route.get('wiki/:wiki/page/:page/edit', async ({ params, request, response, user, view }) => {
     if (!user) return response.redirect().toRoute('authentication.login')
     const { wiki, page } = params
+    const revision: string | undefined = request.qs().revision
+
     const wikiPage = await g
       .V()
       .has('wiki', 'slug', wiki)
-      .out('page_of')
+      .in_('page_of')
       .has('page', 'slug', page)
       .project('pageInfo', 'mainRevision', 'previousEditor')
       .by(process.statics.elementMap('title', 'slug', 'date'))
@@ -123,6 +126,8 @@ Route.group(() => {
     if (!user) return response.status(400).send('no user')
     const editPageSchema = schema.create({
       body: schema.string({ trim: true }, []),
+      comment: schema.string({ trim: true }, []),
+      revision: schema.string({ trim: true }, []),
     })
     const payload = await request.validate({ schema: editPageSchema })
     const now = new Date().toISOString()
@@ -133,10 +138,11 @@ Route.group(() => {
       .property('date', now)
       .property('status', 'pending')
       .property('body', payload.body)
+      .property('comment', payload.comment)
       // get page vertex as b
       .V()
       .has('wiki', 'slug', wiki)
-      .out('page_of')
+      .in_('page_of')
       .has('page', 'slug', page)
       .as('b')
       // Get the user vertex as c
@@ -150,6 +156,9 @@ Route.group(() => {
       .addE('edited')
       .from_('c')
       .to('a')
+      .addE('branched_from')
+      .from_('a')
+      .to(process.statics.V(payload.revision))
       .next()
 
     return response.redirect().toRoute('page.show', { wiki: wiki, page: page })
@@ -163,7 +172,7 @@ Route.group(() => {
     const x = await g
       .V()
       .has('wiki', 'slug', wiki)
-      .out('page_of')
+      .in_('page_of')
       .has('page', 'slug', page)
       .in_('edit_of')
       .has('revision', 'status', 'pending')

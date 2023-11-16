@@ -7,7 +7,6 @@ export default class WikisController {
   public async index({}: HttpContextContract) {}
 
   public async create({ view, user, response }: HttpContextContract) {
-    console.log(user)
     if (user) return view.render('Wiki/create')
     else return response.redirect().toRoute('authentication.login')
   }
@@ -37,7 +36,7 @@ export default class WikisController {
 
   public async show({ params, view }: HttpContextContract) {
     const { wiki } = params
-    const pages = await g.V().has('wiki', 'slug', wiki).out('of').elementMap().fold().next()
+    const pages = await g.V().has('wiki', 'slug', wiki).in_('page_of').elementMap().fold().next()
     const pagesobj = pages.value.map((p: Map<any, any>) => Object.fromEntries(p))
     return view.render('Wiki/show', { pages: pagesobj })
   }

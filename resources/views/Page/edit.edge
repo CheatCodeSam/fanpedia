@@ -7,7 +7,7 @@
     <form action="{{ route(('page.update'), {'wiki': request.params().wiki, 'page': request.params().page  }) }}" method="POST">     
     <div>
         <p>
-          <label for="title"> </label>
+          <label for="title">Page title</label>
         </p>
 
         <input type="text" value="{{page.title}}" name="title" disabled />
@@ -26,6 +26,15 @@
         </p>
         <textarea name="body" cols="30" rows="10">{{ revision.body }}</textarea>
       </div>
+
+      <div>
+        <p>
+          <label for="comment"> Comment </label>
+        </p>
+        <textarea name="comment" cols="30" rows="10"></textarea>
+      </div>
+
+      <input type="hidden" id="revision" name="revision" value="{{revision.id}}">
 
       <div>
         <button type="submit">Page Wiki</button>

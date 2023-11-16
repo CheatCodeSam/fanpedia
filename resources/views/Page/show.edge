@@ -6,11 +6,11 @@
     <h1>{{page.title}}</h1>
     <div>{{revision.body}}</div>
 
-    <a href="{{ route(('page.edit'), {'wiki': request.params().wiki, 'page': request.params().page }) }}">Edit</a>
+    <a href="{{ route('page.edit', {'wiki': request.params().wiki, 'page': request.params().page }) }}">Edit</a> * 
+    <a href="{{ route('page.revisions', {'wiki': request.params().wiki, 'page': request.params().page }) }}">Revisions</a>
 
     <div>
         <div>revision id: {{revision.id}}</div>
-
         <div>page created: {{page.date}}</div>
         <div>revision created: {{revision.date}}</div>
     </div>
