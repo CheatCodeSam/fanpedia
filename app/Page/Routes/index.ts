@@ -41,11 +41,11 @@ Route.group(() => {
       // Get the user vertex as b
       .V(user.userVertex)
       .as('b')
-      // Create an edge to represent that this user created this page
+      // user created this page
       .addE('created')
       .from_('b')
       .to('a')
-      // Link the page to a specific wiki
+      // page is a page of the wiki
       .addE('page_of')
       .from_(process.statics.V().has('wiki', 'slug', wiki))
       .to('a')
@@ -59,12 +59,12 @@ Route.group(() => {
       .addE('main')
       .from_('a')
       .to('c')
-      // Link the revision to the page
+      // revision is edit of page
       .addE('edit_of')
-      .from_('a')
-      .to('c')
-      // Link the revision to the user who made it
-      .addE('edited_by')
+      .from_('c')
+      .to('a')
+      // user edited revision
+      .addE('edited')
       .from_('b')
       .to('c')
       .next()
@@ -76,7 +76,7 @@ Route.group(() => {
     const retval = await g
       .V()
       .has('wiki', 'slug', wiki)
-      .out('of')
+      .out('page_of')
       .has('page', 'slug', page)
       .project('pageInfo', 'mainRevision')
       .by(process.statics.elementMap('title', 'slug', 'date'))
@@ -96,27 +96,65 @@ Route.group(() => {
     const wikiPage = await g
       .V()
       .has('wiki', 'slug', wiki)
-      .out('of')
+      .out('page_of')
       .has('page', 'slug', page)
-      .project('pageInfo', 'mainRevision')
+      .project('pageInfo', 'mainRevision', 'previousEditor')
       .by(process.statics.elementMap('title', 'slug', 'date'))
       .by(process.statics.out('main').elementMap('body', 'date', 'status'))
+      .by(process.statics.out('main').in_('edited').elementMap('username'))
       .next()
+    console.log(wikiPage)
     if (!wikiPage) return response.status(400).send('Wiki does not exists')
     return view.render('Page/edit', {
       page: Object.fromEntries(wikiPage.value.get('pageInfo')),
       revision: Object.fromEntries(wikiPage.value.get('mainRevision')),
+      previousEditor: Object.fromEntries(wikiPage.value.get('previousEditor')),
     })
   }).as('edit')
 
   Route.post('wiki/:wiki/page/:page', async ({ params, response, user, request }) => {
     const { wiki, page } = params
+    // What if wiki/page doesnt exist?
+    console.log('hi')
     if (!user) return response.status(400).send('no user')
     const editPageSchema = schema.create({
-      body: schema.string({ trim: true }, [rules.maxLength(155)]),
+      body: schema.string({ trim: true }, []),
     })
     const payload = await request.validate({ schema: editPageSchema })
-    console.log(payload)
+    const now = new Date().toISOString()
+    await g
+      // create revision as a
+      .addV('revision')
+      .as('a')
+      .property('date', now)
+      .property('status', 'approved')
+      .property('body', payload.body)
+      // get page vertex as b
+      .V()
+      .has('wiki', 'slug', wiki)
+      .out('page_of')
+      .has('page', 'slug', page)
+      .as('b')
+      // drop main from previous revision
+      .sideEffect(process.statics.select('b').outE('main').drop())
+      // Get the user vertex as c
+      .V(user.userVertex)
+      .as('c')
+      // revision is new main revision
+      .addE('main')
+      .from_('b')
+      .to('a')
+      // revision is edit of page
+      .addE('edit_of')
+      .from_('a')
+      .to('b')
+      // user edited revision
+      .addE('edited')
+      .from_('c')
+      .to('a')
+      .next()
+
+    return response.redirect().toRoute('page.show', { wiki: wiki, page: page })
   }).as('update')
 })
   .as('page')
