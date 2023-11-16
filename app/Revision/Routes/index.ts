@@ -11,7 +11,7 @@ Route.group(() => {
     const revisionExists = await g.V(revision).hasNext()
     if (!revisionExists) return response.status(404)
 
-    await g
+    const retval = await g
       .V(revision)
       .property('status', 'approved')
       .as('approvedRevision')
@@ -21,9 +21,16 @@ Route.group(() => {
       .addE('main')
       .from_('page')
       .to('approvedRevision')
+      .select('page')
+      .project('pageSlug', 'wikiSlug')
+      .by('slug')
+      .by(process.statics.out('page_of').values('slug'))
       .next()
 
-    return 'sucess'
+    return response.redirect().toRoute('page.show', {
+      wiki: retval.value.get('wikiSlug'),
+      page: retval.value.get('pageSlug'),
+    })
   }).as('approve')
   Route.get(':revision/reject', async ({ user, response, params }) => {
     if (!user) return response.redirect('/login')
