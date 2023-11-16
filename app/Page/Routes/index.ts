@@ -97,11 +97,9 @@ Route.group(() => {
     })
   }).as('show')
 
-  Route.get('wiki/:wiki/page/:page/edit', async ({ params, request, response, user, view }) => {
+  Route.get('wiki/:wiki/page/:page/edit', async ({ params, response, user, view }) => {
     if (!user) return response.redirect().toRoute('authentication.login')
     const { wiki, page } = params
-    const revision: string | undefined = request.qs().revision
-
     const wikiPage = await g
       .V()
       .has('wiki', 'slug', wiki)
