@@ -10,8 +10,8 @@
                     { qs: { revision: revision.id } }
                 )
             }}">
-                {{ revision.id }} * {{ revision.comment }}
-            </a>
+                {{ revision.id }} * {{ revision.comment }}</a> - <a href="{{route('revision.approve', {revision: revision.id})}}">Approve</a>  | <a href="{{route('revision.reject', {revision: revision.id})}}">Reject</a> 
+            
         </li>
     @end
 @end

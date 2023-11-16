@@ -24,6 +24,7 @@ import g from '@ioc:Database/Gremlin'
 import 'App/Authentication/Routes'
 import 'App/Wiki/Routes'
 import 'App/Page/Routes'
+import 'App/Revision/Routes'
 
 Route.get('/', async ({ view, user }) => {
   return user ? user.username : 'Not logged in'
