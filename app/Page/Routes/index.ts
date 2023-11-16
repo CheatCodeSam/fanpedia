@@ -71,17 +71,24 @@ Route.group(() => {
     return response.redirect().toRoute('page.show', { wiki: wiki, page: payload.slug })
   }).as('store')
 
-  Route.get('wiki/:wiki/page/:page', async ({ params, response, view }) => {
+  Route.get('wiki/:wiki/page/:page', async ({ params, request, response, view }) => {
     const { wiki, page } = params
-    const retval = await g
+    const revision: string | undefined = request.qs().revision
+    let val = g
       .V()
       .has('wiki', 'slug', wiki)
       .out('page_of')
       .has('page', 'slug', page)
       .project('pageInfo', 'mainRevision')
       .by(process.statics.elementMap('title', 'slug', 'date'))
-      .by(process.statics.out('main').elementMap('body', 'date', 'status'))
-      .next()
+    if (revision) {
+      val = val.by(
+        process.statics.in_('edit_of').hasId(revision).elementMap('body', 'date', 'status')
+      )
+    } else {
+      val = val.by(process.statics.out('main').elementMap('body', 'date', 'status'))
+    }
+    const retval = await val.next()
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', {
       page: Object.fromEntries(retval.value.get('pageInfo')),
@@ -165,7 +172,6 @@ Route.group(() => {
       .next()
 
     const retVal = x.value.map((map: Map<any, any>) => Object.fromEntries(map))
-    console.log(retVal)
     return view.render('Page/revisions', {
       revisions: retVal,
     })

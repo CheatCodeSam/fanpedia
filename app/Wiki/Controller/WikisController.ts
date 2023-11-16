@@ -24,13 +24,15 @@ export default class WikisController {
     if (doesSubdomainAlreadyExist) return response.status(400).send('Wiki already exists')
     await g
       .addV('wiki')
+      .as('a')
       .property('title', payload.title)
       .property('slug', payload.slug)
       .property('description', payload.description)
       .addE('created')
       .from_(process.statics.V(user.userVertex))
+      .to('a')
       .next()
-    return payload
+    return response.redirect().toRoute('wiki.show', { wiki: payload.slug })
   }
 
   public async show({ params, view }: HttpContextContract) {
