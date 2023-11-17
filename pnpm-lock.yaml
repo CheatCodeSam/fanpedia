@@ -26,6 +26,9 @@ dependencies:
   axios:
     specifier: ^1.6.1
     version: 1.6.1
+  diff:
+    specifier: ^5.1.0
+    version: 5.1.0
   gremlin:
     specifier: ^3.7.0
     version: 3.7.0
@@ -61,6 +64,9 @@ devDependencies:
   '@symfony/webpack-encore':
     specifier: 4.1.1
     version: 4.1.1(@babel/core@7.23.3)(@babel/preset-env@7.23.3)(eslint@8.53.0)(postcss@8.4.31)(typescript@4.6.4)(webpack-cli@4.10.0)(webpack@5.89.0)
+  '@types/diff':
+    specifier: ^5.0.8
+    version: 5.0.8
   '@types/gremlin':
     specifier: ^3.6.6
     version: 3.6.6
@@ -2280,6 +2286,10 @@ packages:
     resolution: {integrity: sha512-b698BLJ6kPVd6uhHsY7wlebZdrWPXYied883PDSzpJZYOP97EOn/oGdLCH3jJf157srkFReIZY5v0H1s8Dozrg==}
     dev: true
 
+  /@types/diff@5.0.8:
+    resolution: {integrity: sha512-kR0gRf0wMwpxQq6ME5s+tWk9zVCfJUl98eRkD05HWWRbhPB/eu4V1IbyZAsvzC1Gn4znBJ0HN01M4DGXdBEV8Q==}
+    dev: true
+
   /@types/eslint-scope@3.7.7:
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
     dependencies:
@@ -4229,6 +4239,11 @@ packages:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dev: true
+
+  /diff@5.1.0:
+    resolution: {integrity: sha512-D+mk+qE8VC/PAUrlAU34N+VfXev0ghe5ywmpqrawphmVZc1bEfn56uo9qpyGp1p4xpzOHkSW4ztBd6L7Xx4ACw==}
+    engines: {node: '>=0.3.1'}
+    dev: false
 
   /dir-glob@2.2.2:
     resolution: {integrity: sha512-f9LBi5QWzIW3I6e//uxZoLBlUt9kcp66qo0sSCxL6YZKc75R1c4MFCoe/LaZiBGmgujvQdxc5Bn3QhfyvK5Hsw==}
