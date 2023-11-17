@@ -10,7 +10,11 @@
     <a href="{{ route('page.revisions', {'wiki': request.params().wiki, 'page': request.params().page }) }}">Revisions</a>
 
     <div>
-        <div>revision id: {{revision.id}}</div>
+        <div>revision id: {{revision.id}}
+            @if(isMainRevision)
+            | <b>main</b>
+            @end
+        </div>
         <div>page created: {{page.date}}</div>
         <div>revision created: {{revision.date}}</div>
     </div>

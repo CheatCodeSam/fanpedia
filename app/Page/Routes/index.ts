@@ -75,17 +75,19 @@ Route.group(() => {
   Route.get('wiki/:wiki/page/:page', async ({ params, request, response, view }) => {
     const { wiki, page } = params
     const revision: string | undefined = request.qs().revision
+    let isMainRevision = true
     let val = g
       .V()
       .has('wiki', 'slug', wiki)
       .in_('page_of')
       .has('page', 'slug', page)
-      .project('pageInfo', 'mainRevision')
+      .project('pageInfo', 'Revision')
       .by(process.statics.elementMap('title', 'slug', 'date'))
     if (revision) {
       val = val.by(
         process.statics.in_('edit_of').hasId(revision).elementMap('body', 'date', 'status')
       )
+      isMainRevision = false
     } else {
       val = val.by(process.statics.out('main').elementMap('body', 'date', 'status'))
     }
@@ -93,7 +95,8 @@ Route.group(() => {
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', {
       page: Object.fromEntries(retval.value.get('pageInfo')),
-      revision: Object.fromEntries(retval.value.get('mainRevision')),
+      revision: Object.fromEntries(retval.value.get('Revision')),
+      isMainRevision: isMainRevision,
     })
   }).as('show')
 
