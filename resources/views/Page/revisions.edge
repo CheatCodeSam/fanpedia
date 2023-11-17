@@ -7,11 +7,20 @@
                 route(
                     'page.show',
                     { wiki: request.params().wiki, page: request.params().page },
-                    { qs: { revision: revision.id } }
+                    { qs: { revision: revision.revision.id } }
                 )
             }}">
-                {{ revision.id }} * {{ revision.comment }}</a> - <a href="{{route('revision.approve', {revision: revision.id})}}">Approve</a>  | <a href="{{route('revision.reject', {revision: revision.id})}}">Reject</a> 
-            
+                {{ revision.revision.id }}</a> - {{ revision.revision.comment }}
+            - by {{ revision.user }} -
+            <a href="{{route('revision.approve', {revision: revision.revision.id})}}">
+                Approve</a> |
+            <a href="{{route('revision.reject', {revision: revision.revision.id})}}">
+                Reject</a> based on:
+            @if(revision.basedOn.isMain)
+                <b> Main </b>
+            @else
+                <span> {{revision.basedOn.revision.id}} </span>
+            @end
         </li>
     @end
 @end

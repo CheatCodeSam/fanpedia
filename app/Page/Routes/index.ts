@@ -3,6 +3,18 @@ import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
+const MapToObject = (map: any): object => {
+  const obj = {}
+  for (let [key, value] of map) {
+    if (value instanceof Map) {
+      obj[key] = MapToObject(value)
+    } else {
+      obj[key] = value
+    }
+  }
+  return obj
+}
+
 Route.group(() => {
   Route.get('wiki/:wiki/page/create', async ({ user, params, response, view }) => {
     const { wiki } = params
@@ -170,6 +182,7 @@ Route.group(() => {
     const { wiki, page } = params
     //TODO does page and wiki exist?
 
+    const PS = process.statics
     const x = await g
       .V()
       .has('wiki', 'slug', wiki)
@@ -177,11 +190,17 @@ Route.group(() => {
       .has('page', 'slug', page)
       .in_('edit_of')
       .has('revision', 'status', 'pending')
-      .elementMap()
+      .project('revision', 'user', 'basedOn')
+      .by(PS.elementMap())
+      .by(PS.in_('edited').values('username'))
+      .by(
+        PS.project('revision', 'isMain')
+          .by(PS.out('branched_from').elementMap('date', 'id'))
+          .by(PS.coalesce(PS.out('branched_from').inE('main').constant(true), PS.constant(false)))
+      )
       .fold()
       .next()
-
-    const retVal = x.value.map((map: Map<any, any>) => Object.fromEntries(map))
+    const retVal = x.value.map((p) => MapToObject(p))
     return view.render('Page/revisions', {
       revisions: retVal,
     })
