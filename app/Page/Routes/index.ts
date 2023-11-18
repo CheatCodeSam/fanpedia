@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route'
 import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import { Converter } from 'showdown'
 
 const MapToObject = (map: any): object => {
   const obj = {}
@@ -31,9 +32,10 @@ Route.group(() => {
     if (!user) return response.redirect().toRoute('authentication.login')
     const pageSchema = schema.create({
       title: schema.string({ trim: true }, [rules.minLength(3)]),
-      body: schema.string({ trim: true }, [rules.maxLength(155)]),
+      body: schema.string({ trim: true }),
       slug: schema.string({ trim: true }, [rules.regex(/^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/)]),
     })
+    console.log('wft')
     const payload = await request.validate({ schema: pageSchema })
     const doesPageAlreadyExists = await g
       .V()
@@ -104,10 +106,12 @@ Route.group(() => {
       val = val.by(process.statics.out('main').elementMap('body', 'date', 'status'))
     }
     const retval = await val.next()
+    const md = new Converter().makeHtml(retval.value.get('Revision').get('body'))
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', {
       page: Object.fromEntries(retval.value.get('pageInfo')),
       revision: Object.fromEntries(retval.value.get('Revision')),
+      body: md,
       isMainRevision: isMainRevision,
     })
   }).as('show')

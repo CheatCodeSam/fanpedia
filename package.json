@@ -44,9 +44,9 @@
     "@japa/preset-adonis": "^1.2.0",
     "@japa/runner": "2.5.1",
     "@symfony/webpack-encore": "4.1.1",
-    "@types/diff": "^5.0.8",
     "@types/gremlin": "^3.6.6",
     "@types/proxy-addr": "^2.0.3",
+    "@types/showdown": "^2.0.4",
     "@types/source-map-support": "^0.5.10",
     "adonis-preset-ts": "^2.1.0",
     "eslint": "^8.53.0",
@@ -69,11 +69,11 @@
     "@adonisjs/shield": "^7.0.0",
     "@adonisjs/view": "^6.1.0",
     "axios": "^1.6.1",
-    "diff": "^5.1.0",
     "gremlin": "^3.7.0",
     "jose": "^5.1.0",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
+    "showdown": "^2.1.0",
     "source-map-support": "^0.5.21"
   }
 }

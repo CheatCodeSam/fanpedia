@@ -4,7 +4,7 @@
 
     <a href="{{  route('wiki.show', {'wiki': request.params().wiki }) }}">Go back</a>
     <h1>{{page.title}}</h1>
-    <div>{{revision.body}}</div>
+    <div>{{{body}}}</div>
 
     <a href="{{ route('page.edit', {'wiki': request.params().wiki, 'page': request.params().page }) }}">Edit</a> * 
     <a href="{{ route('page.revisions', {'wiki': request.params().wiki, 'page': request.params().page }) }}">Revisions</a>
