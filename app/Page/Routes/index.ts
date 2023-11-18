@@ -44,6 +44,7 @@ Route.group(() => {
       .has('page', 'slug', payload.slug)
       .hasNext()
     if (doesPageAlreadyExists) return response.status(400).send('Page already exists')
+    const formattedBody = payload.body.replace(/\r/g, '')
     const now = new Date().toISOString()
     await g
       // Create a new vertex for the page as a
@@ -66,7 +67,7 @@ Route.group(() => {
       // Create a new vertex for the page's initial revision
       .addV('revision')
       .as('c')
-      .property('body', payload.body)
+      .property('body', formattedBody)
       .property('date', now)
       .property('status', 'approved')
       .property('comment', 'Initial revision')
@@ -106,6 +107,7 @@ Route.group(() => {
       val = val.by(process.statics.out('main').elementMap('body', 'date', 'status'))
     }
     const retval = await val.next()
+    console.log(retval.value.get('Revision').get('body').split('\n'))
     const md = new Converter().makeHtml(retval.value.get('Revision').get('body'))
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', {
