@@ -44,7 +44,7 @@ Route.group(() => {
       .has('page', 'slug', payload.slug)
       .hasNext()
     if (doesPageAlreadyExists) return response.status(400).send('Page already exists')
-    const formattedBody = payload.body.replace(/\r/g, '')
+    const formattedBody = payload.body.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
     const now = new Date().toISOString()
     await g
       // Create a new vertex for the page as a
@@ -150,13 +150,14 @@ Route.group(() => {
     })
     const payload = await request.validate({ schema: editPageSchema })
     const now = new Date().toISOString()
+    const formattedBody = payload.body.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
     await g
       // create revision as a
       .addV('revision')
       .as('a')
       .property('date', now)
       .property('status', 'pending')
-      .property('body', payload.body)
+      .property('body', formattedBody)
       .property('comment', payload.comment)
       // get page vertex as b
       .V()
