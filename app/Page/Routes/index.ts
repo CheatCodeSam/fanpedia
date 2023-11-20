@@ -35,7 +35,6 @@ Route.group(() => {
       body: schema.string({ trim: true }),
       slug: schema.string({ trim: true }, [rules.regex(/^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/)]),
     })
-    console.log('wft')
     const payload = await request.validate({ schema: pageSchema })
     const doesPageAlreadyExists = await g
       .V()
