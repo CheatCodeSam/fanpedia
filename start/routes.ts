@@ -26,7 +26,6 @@ import 'App/Page/Routes'
 import 'App/Revision/Routes'
 import 'App/File/Routes'
 
-Route.get('/', async ({ view, user }) => {
+Route.get('/', async ({ user }) => {
   return user ? user.username : 'Not logged in'
-  // return view.render('welcome')
 }).middleware('authenticated')

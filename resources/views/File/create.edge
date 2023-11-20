@@ -1,0 +1,23 @@
+@layout('Layouts/main')
+
+
+@section('body')
+<form action="{{ route('file.store', {'wiki': request.params().wiki }) }}" method="POST" enctype="multipart/form-data">
+    <div>
+        <div>
+            <p>
+                <label for="image"> File </label>
+            </p>
+            <input type="file" name="image" required>      
+        <div>
+            <p>
+                <label for="description"> Description </label>
+            </p>
+            <textarea name="description" cols="30" rows="10"></textarea>
+        </div>
+        <div>
+            <button type="submit">Page Wiki</button>
+        </div>
+    </div>
+</form>
+@end
