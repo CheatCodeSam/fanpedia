@@ -1,4 +1,4 @@
-ARG NODE_IMAGE=node:20.9.0-alpine
+ARG NODE_IMAGE=node:20.10.0-alpine
 
 FROM $NODE_IMAGE AS base
 LABEL maintainer="Carson Weeks <mail@carsonweeks.com>"
