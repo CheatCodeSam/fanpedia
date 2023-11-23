@@ -24,7 +24,7 @@ import 'App/Authentication/Routes'
 import 'App/Wiki/Routes'
 import 'App/Page/Routes'
 import 'App/Revision/Routes'
-import 'App/File/Routes'
+import 'App/Storage/Routes'
 
 Route.get('/', async ({ user }) => {
   return user ? user.username : 'Not logged in'
