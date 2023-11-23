@@ -1,10 +1,6 @@
 {
   "typescript": true,
-  "commands": [
-    "./commands",
-    "@adonisjs/core/build/commands/index.js",
-    "@adonisjs/repl/build/commands"
-  ],
+  "commands": ["@adonisjs/core/build/commands/index.js", "@adonisjs/repl/build/commands"],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "aliases": {
     "App": "app",

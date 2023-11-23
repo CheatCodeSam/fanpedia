@@ -22,6 +22,7 @@ Route.group(() => {
     })
     const payload = await request.validate({ schema: uploadSchema })
     // do something
+    return payload
   }).as('store')
 })
   .as('file')
@@ -29,4 +30,5 @@ Route.group(() => {
 
 Route.get('file/:key/*', async ({ params }) => {
   const { key } = params
+  return key
 }).as('file')
