@@ -6,26 +6,14 @@ export default class CognitoProvider {
   public async register() {
     const config = this.app.config.get('cognito')
     const jose = await import('jose')
-    const authenticationService = await import('App/Authentication/Service')
+    const { AuthenticationService } = await import('App/Authentication/Service')
     const keys = jose.createRemoteJWKSet(
       new URL(
         `https://cognito-idp.${config.region}.amazonaws.com/${config.user_id_pool}/.well-known/jwks.json`
       )
     )
     this.app.container.singleton('Authentication/Cognito', () => {
-      return new authenticationService.default(keys)
+      return new AuthenticationService(keys)
     })
-  }
-
-  public async boot() {
-    // IoC container is ready
-  }
-
-  public async ready() {
-    // App is ready
-  }
-
-  public async shutdown() {
-    // Cleanup, since app is going down
   }
 }

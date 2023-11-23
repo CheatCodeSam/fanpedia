@@ -1,7 +1,7 @@
 import Route from '@ioc:Adonis/Core/Route'
 import config from 'Config/cognito'
 import AuthenticationService from '@ioc:Authentication/Cognito'
-import TokenService from '../Service/TokenService'
+import { TokenService } from '../Service'
 import Redis from '@ioc:Adonis/Addons/Redis'
 import * as crypto from 'node:crypto'
 import { Session } from '../Types'
