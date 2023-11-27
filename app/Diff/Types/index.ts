@@ -8,4 +8,4 @@ export interface DiffChunk {
   endB: number
 }
 
-export type Changes = [DiffChunk, DiffChunk][]
+export type Changes = [DiffChunk | null, DiffChunk | null][]

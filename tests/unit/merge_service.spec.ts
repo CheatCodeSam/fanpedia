@@ -1,5 +1,5 @@
 import { test } from '@japa/runner'
 
-test.group('Merge service', () => {
+test.group('MergeService', () => {
   // Write your test here
 })
