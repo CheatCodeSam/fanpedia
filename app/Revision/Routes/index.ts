@@ -1,6 +1,7 @@
 import Route from '@ioc:Adonis/Core/Route'
 import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 //TODO make these post requests
 Route.group(() => {
@@ -40,6 +41,8 @@ Route.group(() => {
       .by('slug')
       .by(PS.out('page_of').values('slug'))
       .next()
+
+    // Logger.info(`User ${user.cognitoId} has approved Revision ${} by ${} for Page ${}`)
 
     return response.redirect().toRoute('page.show', {
       wiki: retval.value.get('wikiSlug'),

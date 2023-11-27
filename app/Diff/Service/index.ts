@@ -1,3 +1,5 @@
 import TokenizerService from './TokenizerService'
+import DiffService from './DiffService'
+import MergeService from './MergeService'
 
-export { TokenizerService }
+export { TokenizerService, DiffService, MergeService }
