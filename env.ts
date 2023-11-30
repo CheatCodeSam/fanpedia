@@ -12,6 +12,7 @@
 |
 */
 
+import { EncodingType } from '@aws-sdk/client-s3'
 import Env from '@ioc:Adonis/Core/Env'
 
 export default Env.rules({
@@ -23,6 +24,8 @@ export default Env.rules({
   SESSION_DRIVER: Env.schema.string(),
   DRIVE_DISK: Env.schema.enum(['local'] as const),
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
+
+  URL: Env.schema.string(),
 
   GREMLIN_ENDPOINT: Env.schema.string(),
 

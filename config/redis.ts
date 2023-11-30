@@ -41,6 +41,9 @@ export default redisConfig({
       password: Env.get('REDIS_PASSWORD', ''),
       db: 0,
       keyPrefix: '',
+      tls: {
+        host: Env.get("REDIS_HOST"),
+      },
     },
   },
 })
