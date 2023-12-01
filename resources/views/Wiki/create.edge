@@ -1,32 +1,32 @@
 @layout('Layouts/main')
 
 @section('body')
-    <form action="{{ route('wiki.store') }}" method="POST">     
-    <div>
-        <p>
-          <label for="title"> Wiki title </label>
-        </p>
+<form action="{{ route('wiki.store', {}, { domain: 'fanpedia-project.com' }) }}" method="POST">
+  <div>
+    <p>
+      <label for="title"> Wiki title </label>
+    </p>
 
-        <input type="text" name="title" />
-      </div>
-    <div>
-        <p>
-          <label for="slug"> Wiki slug </label>
-        </p>
+    <input type="text" name="title" />
+  </div>
+  <div>
+    <p>
+      <label for="slug"> Wiki slug </label>
+    </p>
 
-        <input type="text" name="slug" />
-      </div>
+    <input type="text" name="slug" />
+  </div>
 
-      <div>
-        <p>
-          <label for="description"> Wiki Description </label>
-        </p>
+  <div>
+    <p>
+      <label for="description"> Wiki Description </label>
+    </p>
 
-        <textarea name="description" cols="30" rows="10"></textarea>
-      </div>
+    <textarea name="description" cols="30" rows="10"></textarea>
+  </div>
 
-      <div>
-        <button type="submit">Create Wiki</button>
-      </div>
-    </form>
+  <div>
+    <button type="submit">Create Wiki</button>
+  </div>
+</form>
 @end

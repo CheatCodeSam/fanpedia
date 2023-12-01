@@ -31,11 +31,11 @@ export default class WikisController {
       .from_(process.statics.V(user.userVertex))
       .to('a')
       .next()
-    return response.redirect().toRoute('wiki.show', { wiki: payload.slug })
+    return response.redirect().toPath(`https://${payload.slug}.fanpedia-project.com`)
   }
 
-  public async show({ params, view }: HttpContextContract) {
-    const { wiki } = params
+  public async show({ view, subdomains }: HttpContextContract) {
+    const { wiki } = subdomains
     const pages = await g.V().has('wiki', 'slug', wiki).in_('page_of').elementMap().fold().next()
     const pagesobj = pages.value.map((p: Map<any, any>) => Object.fromEntries(p))
     return view.render('Wiki/show', { pages: pagesobj })

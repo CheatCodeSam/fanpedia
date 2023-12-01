@@ -44,7 +44,7 @@ Route.group(() => {
       }
       const sessionId = crypto.randomUUID()
       await Redis.set(`auth:session:${sessionId}`, JSON.stringify(tokens))
-      response.cookie('oidc_session', sessionId, {})
+      response.cookie('oidc_session', sessionId, { domain: 'fanpedia-project.com' })
       response.redirect('/')
     } catch (error: any) {
       console.log(error)
@@ -66,4 +66,6 @@ Route.group(() => {
     response.clearCookie('oidc_session')
     response.redirect(signOutUrl)
   }).as('logout')
-}).as('authentication')
+})
+  .as('authentication')
+  .domain('fanpedia-project.com')

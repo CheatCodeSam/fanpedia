@@ -44,10 +44,13 @@ Route.group(() => {
 
     // Logger.info(`User ${user.cognitoId} has approved Revision ${} by ${} for Page ${}`)
 
-    return response.redirect().toRoute('page.show', {
-      wiki: retval.value.get('wikiSlug'),
-      page: retval.value.get('pageSlug'),
-    })
+    return response.redirect().toRoute(
+      'page.show',
+      {
+        page: retval.value.get('pageSlug'),
+      },
+      { domain: ':wiki.fanpedia-project.com' }
+    )
   }).as('approve')
   Route.get(':revision/reject', async ({ user, response, params }) => {
     if (!user) return response.redirect('/login')
@@ -62,5 +65,6 @@ Route.group(() => {
   }).as('reject')
 })
   .as('revision')
+  .domain('fanpedia-project.com')
   .prefix('revision')
   .middleware('authenticated')

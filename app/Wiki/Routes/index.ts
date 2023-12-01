@@ -2,19 +2,26 @@ import Route from '@ioc:Adonis/Core/Route'
 import '../Controller/WikisController'
 
 Route.group(() => {
-  Route.get('create', async (ctx) => {
+  Route.get('wiki/create', async (ctx) => {
     const { default: WikisController } = await import('../Controller/WikisController')
     return new WikisController().create(ctx)
-  }).as('create')
-  Route.post('/', async (ctx) => {
+  })
+    .as('create')
+    .domain('fanpedia-project.com')
+
+  Route.post('wiki', async (ctx) => {
     const { default: WikisController } = await import('../Controller/WikisController')
     return new WikisController().store(ctx)
-  }).as('store')
-  Route.get(':wiki', async (ctx) => {
+  })
+    .as('store')
+    .domain('fanpedia-project.com')
+
+  Route.get('/', async (ctx) => {
     const { default: WikisController } = await import('../Controller/WikisController')
     return new WikisController().show(ctx)
-  }).as('show')
+  })
+    .as('show')
+    .domain(':wiki.fanpedia-project.com')
 })
   .as('wiki')
-  .prefix('wiki')
   .middleware('authenticated')

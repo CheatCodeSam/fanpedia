@@ -25,7 +25,15 @@ import 'App/Wiki/Routes'
 import 'App/Page/Routes'
 import 'App/Revision/Routes'
 import 'App/Storage/Routes'
+import Redis from '@ioc:Adonis/Addons/Redis'
 
 Route.get('/', async ({ user }) => {
   return user ? user.username : 'Not logged in'
-}).middleware('authenticated')
+})
+  .middleware('authenticated')
+  .domain('fanpedia-project.com')
+
+Route.get('/test', async () => {
+  await Redis.set('p', 'p')
+  return 'f'
+})

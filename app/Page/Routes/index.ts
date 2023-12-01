@@ -17,16 +17,16 @@ const MapToObject = (map: any): object => {
 }
 
 Route.group(() => {
-  Route.get('wiki/:wiki/page/create', async ({ user, params, response, view }) => {
-    const { wiki } = params
+  Route.get('page/create', async ({ user, subdomains, response, view }) => {
+    const { wiki } = subdomains
     const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
     if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
     if (!user) return response.redirect().toRoute('authentication.login')
     return view.render('Page/create')
   }).as('create')
 
-  Route.post('wiki/:wiki/page', async ({ request, user, params, response }) => {
-    const { wiki } = params
+  Route.post('page', async ({ request, user, response, subdomains }) => {
+    const { wiki } = subdomains
     const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
     if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
     if (!user) return response.redirect().toRoute('authentication.login')
@@ -83,11 +83,14 @@ Route.group(() => {
       .from_('b')
       .to('c')
       .next()
-    return response.redirect().toRoute('page.show', { wiki: wiki, page: payload.slug })
+    return response
+      .redirect()
+      .toRoute('page.show', { page: payload.slug }, { domain: ':wiki.fanpedia-project.com' })
   }).as('store')
 
-  Route.get('wiki/:wiki/page/:page', async ({ params, request, response, view }) => {
-    const { wiki, page } = params
+  Route.get('page/:page', async ({ params, request, response, view, subdomains }) => {
+    const { page } = params
+    const { wiki } = subdomains
     const revision: string | undefined = request.qs().revision
     let isMainRevision = true
     let val = g
@@ -106,7 +109,6 @@ Route.group(() => {
       val = val.by(process.statics.out('main').elementMap('body', 'date', 'status'))
     }
     const retval = await val.next()
-    console.log(retval.value.get('Revision').get('body').split('\n'))
     const md = new Converter().makeHtml(retval.value.get('Revision').get('body'))
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', {
@@ -117,9 +119,10 @@ Route.group(() => {
     })
   }).as('show')
 
-  Route.get('wiki/:wiki/page/:page/edit', async ({ params, response, user, view }) => {
+  Route.get('page/:page/edit', async ({ params, response, user, view, subdomains }) => {
     if (!user) return response.redirect().toRoute('authentication.login')
-    const { wiki, page } = params
+    const { page } = params
+    const { wiki } = subdomains
     const wikiPage = await g
       .V()
       .has('wiki', 'slug', wiki)
@@ -138,8 +141,9 @@ Route.group(() => {
     })
   }).as('edit')
 
-  Route.post('wiki/:wiki/page/:page', async ({ params, response, user, request }) => {
-    const { wiki, page } = params
+  Route.post('page/:page', async ({ params, response, user, subdomains, request }) => {
+    const { page } = params
+    const { wiki } = subdomains
     //TODO What if wiki/page doesnt exist?
     if (!user) return response.status(400).send('no user')
     const editPageSchema = schema.create({
@@ -180,12 +184,15 @@ Route.group(() => {
       .to(process.statics.V(payload.revision))
       .next()
 
-    return response.redirect().toRoute('page.show', { wiki: wiki, page: page })
+    return response
+      .redirect()
+      .toRoute('page.show', { page: page }, { domain: ':wiki.fanpedia-project.com' })
   }).as('update')
 
-  Route.get('wiki/:wiki/page/:page/revisions', async ({ params, response, user, view }) => {
+  Route.get('page/:page/revisions', async ({ params, subdomains, response, user, view }) => {
     if (!user) return response.redirect().toRoute('authentication.login')
-    const { wiki, page } = params
+    const { page } = params
+    const { wiki } = subdomains
     //TODO does page and wiki exist?
 
     const PS = process.statics
@@ -213,4 +220,5 @@ Route.group(() => {
   }).as('revisions')
 })
   .as('page')
+  .domain(':wiki.fanpedia-project.com')
   .middleware('authenticated')

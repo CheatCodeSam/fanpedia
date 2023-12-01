@@ -1,21 +1,22 @@
 @layout('Layouts/main')
 
 @section('body')
+<a href="{{ route('wiki.show', {}, { domain: ':wiki.fanpedia-project.com' }) }}">Go back</a>
+<h1>{{page.title}}</h1>
+<div>{{{body}}}</div>
 
-    <a href="{{  route('wiki.show', {'wiki': request.params().wiki }) }}">Go back</a>
-    <h1>{{page.title}}</h1>
-    <div>{{{body}}}</div>
+<a href="{{ route('page.edit', { page: request.params().page }, { domain: ':wiki.fanpedia-project.com' }) }}">Edit</a>
+*
+<a
+    href="{{ route('page.revisions', { page: request.params().page }, { domain: ':wiki.fanpedia-project.com' }) }}">Revisions</a>
 
-    <a href="{{ route('page.edit', {'wiki': request.params().wiki, 'page': request.params().page }) }}">Edit</a> * 
-    <a href="{{ route('page.revisions', {'wiki': request.params().wiki, 'page': request.params().page }) }}">Revisions</a>
-
-    <div>
-        <div>revision id: {{revision.id}}
-            @if(isMainRevision)
-            | <b>main</b>
-            @end
-        </div>
-        <div>page created: {{page.date}}</div>
-        <div>revision created: {{revision.date}}</div>
+<div>
+    <div>revision id: {{revision.id}}
+        @if(isMainRevision)
+        | <b>main</b>
+        @end
     </div>
+    <div>page created: {{page.date}}</div>
+    <div>revision created: {{revision.date}}</div>
+</div>
 @end

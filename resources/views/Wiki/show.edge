@@ -1,10 +1,11 @@
 @layout('Layouts/main')
 
 @section('body')
-    @each(page in pages)
-        <li>
-            <a href="{{ route(('page.show'), {'wiki': request.params().wiki, 'page': page.slug }) }}">  {{ page.title }}</a>
-        </li>
-    @end
-    <a href="{{ route(('page.create'), {'wiki': request.params().wiki }) }}">Create new page</a>
+@each(page in pages)
+<li>
+    <a href="{{ route('page.show', { page: page.slug }, { domain: ':wiki.fanpedia-project.com' }) }}"> {{
+        page.title }}</a>
+</li>
+@end
+<a href="{{ route('page.create', {}, { domain: ':wiki.fanpedia-project.com' }) }}">Create new page</a>
 @end

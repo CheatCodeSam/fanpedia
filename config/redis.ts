@@ -42,7 +42,7 @@ export default redisConfig({
       db: 0,
       keyPrefix: '',
       tls: {
-        host: Env.get("REDIS_HOST"),
+        host: Env.get('REDIS_HOST'),
       },
     },
   },
