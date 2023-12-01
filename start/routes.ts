@@ -19,13 +19,14 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+import Redis from '@ioc:Adonis/Addons/Redis'
 
 import 'App/Authentication/Routes'
 import 'App/Wiki/Routes'
 import 'App/Page/Routes'
 import 'App/Revision/Routes'
 import 'App/Storage/Routes'
-import Redis from '@ioc:Adonis/Addons/Redis'
+import 'App/Health/Routes'
 
 Route.get('/', async ({ user }) => {
   return user ? user.username : 'Not logged in'
