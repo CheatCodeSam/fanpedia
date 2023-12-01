@@ -22,35 +22,33 @@ Route.group(() => {
       .next()
 
     const project = values.value
-    console.log(project)
     if (project.get('main').get(process.t.id) === project.get('commonAncestor').get(process.t.id))
       console.log('fast forward')
 
     const retval = await g
       .V(revision)
-      .property('status', 'approved')
+      // .property('status', 'approved')
       .as('approvedRevision')
       .out('edit_of')
       .as('page')
-      .sideEffect(PS.outE('main').drop())
-      .addE('main')
-      .from_('page')
-      .to('approvedRevision')
+      // .sideEffect(PS.outE('main').drop())
+      // .addE('main')
+      // .from_('page')
+      // .to('approvedRevision')
       .select('page')
-      .project('pageSlug', 'wikiSlug')
-      .by('slug')
-      .by(PS.out('page_of').values('slug'))
+      .project('page', 'revisionAuthor')
+      .by(PS.id())
+      .by(PS.select('approvedRevision').in_('edited').values('cognito_id'))
       .next()
 
-    // Logger.info(`User ${user.cognitoId} has approved Revision ${} by ${} for Page ${}`)
-
-    return response.redirect().toRoute(
-      'page.show',
-      {
-        page: retval.value.get('pageSlug'),
-      },
-      { domain: ':wiki.fanpedia-project.com' }
+    const val = retval.value
+    Logger.info(
+      `User ${user.cognitoId} approved Revision ${revision} by User ${val.get(
+        'revisionAuthor'
+      )} for Page ${val.get('page')}`
     )
+
+    return 'success'
   }).as('approve')
   Route.get(':revision/reject', async ({ user, response, params }) => {
     if (!user) return response.redirect('/login')

@@ -12,7 +12,7 @@
             }}">
         {{ revision.revision.id }}</a> - {{ revision.revision.comment }}
     - by {{ revision.user }} -
-    <a href="{{ route('revision.approve', {revision: revision.revision.id}, { domain: 'fanpedia-project.com' }) }}">
+    <a href="{{ `https://fanpedia-project.com/revision/${revision.revision.id}/approve` }}">
         Approve</a> |
     <a href="{{ route('revision.reject', {revision: revision.revision.id}, { domain: 'fanpedia-project.com' }) }}">
         Reject</a> based on:
