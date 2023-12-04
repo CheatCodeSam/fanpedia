@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route'
 import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
 import Logger from '@ioc:Adonis/Core/Logger'
+import { DiffService, TokenizerService } from 'App/Diff/Service'
 
 //TODO make these post requests
 Route.group(() => {
@@ -24,6 +25,17 @@ Route.group(() => {
     const project = values.value
     if (project.get('main').get(process.t.id) === project.get('commonAncestor').get(process.t.id))
       console.log('fast forward')
+
+    const mb = project.get('main').get('body')
+    const cab = project.get('commonAncestor').get('body')
+    const rb = project.get('revision').get('body')
+
+    const a = TokenizerService.tokenize(mb)
+    const o = TokenizerService.tokenize(cab)
+    const b = TokenizerService.tokenize(rb)
+
+    const diffs = DiffService.threeWayDiff(a, o, b)
+    console.log(diffs)
 
     const retval = await g
       .V(revision)
