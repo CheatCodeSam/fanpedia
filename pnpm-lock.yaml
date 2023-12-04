@@ -29,6 +29,9 @@ dependencies:
   axios:
     specifier: ^1.6.1
     version: 1.6.1
+  fast-myers-diff:
+    specifier: ^3.1.0
+    version: 3.1.0
   gremlin:
     specifier: ^3.7.0
     version: 3.7.0
@@ -5828,6 +5831,10 @@ packages:
     dependencies:
       fastest-levenshtein: 1.0.16
     dev: true
+
+  /fast-myers-diff@3.1.0:
+    resolution: {integrity: sha512-nLOy4sU1cxU+95gGmIiyjAKTmB1Nxaj2UUv9LnSgEv9pVqo2O7TJwQQZCtUJ+x8R5+zrwVn7XFUReb3efFjB/g==}
+    dev: false
 
   /fast-redact@3.3.0:
     resolution: {integrity: sha512-6T5V1QK1u4oF+ATxs1lWUmlEk6P2T9HqJG3e2DnHOdVgZy2rFJBoEnrIedcTXlkAHU/zKC+7KETJ+KGGKwxgMQ==}
