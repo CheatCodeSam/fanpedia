@@ -21,7 +21,7 @@ export default class MergeService {
   }
 
   public static threeWayMerge(a: string[], o: string[], b: string[]): string[] {
-    const unresolved = []
+    const unresolved: number[] = []
     let lastLine = 0
     let mergedLine = 0
     const mergedText: string[] = []
@@ -44,6 +44,7 @@ export default class MergeService {
 
       if (change[0] !== null && change[1] !== null && change[0].tag === 'conflict') {
         let highMark = Math.max(change[0].endA, change[1].endA)
+        // Found conflict
       } else if (change[0] !== null) {
         lastLine += MergeService.applyChange(a, change[0], mergedText)
         mergedLine += change[0].endB - change[0].startB
