@@ -3,7 +3,7 @@ import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { Converter } from 'showdown'
-import { MergeService, TokenizerService } from 'App/Diff/Service'
+import { DiffService, MergeService, TokenizerService } from 'App/Diff/Service'
 
 const MapToObject = (map: any): object => {
   const obj = {}
@@ -143,6 +143,32 @@ Route.group(() => {
       isMainRevision: isMainRevision,
     })
   }).as('show')
+
+  //Temporary route
+  Route.get('page/:page/diff/:diff', async ({ params, request, response, view, subdomains }) => {
+    const { page, diff } = params as Record<string, string>
+    const { wiki } = subdomains as Record<string, string>
+
+    const PS = process.statics
+    // Get a, o, and b
+    const values = await g
+      .V(diff)
+      .project('revision', 'main', 'commonAncestor')
+      .by(PS.elementMap('body', 'comment'))
+      .by(PS.out('edit_of').out('main').elementMap('body'))
+      .by(PS.out('branched_from').elementMap('body'))
+      .next()
+    const project = values.value
+
+    const a = TokenizerService.tokenize(project.get('main').get('body'))
+    const o = TokenizerService.tokenize(project.get('commonAncestor').get('body'))
+    const b = TokenizerService.tokenize(project.get('revision').get('body'))
+    const merge = MergeService.threeWayMerge(a, o, b)
+
+    const retVal = DiffService.twoWayDiff(merge, a)
+
+    return { retVal, main: project.get('main').get('body'), diffedMerge: merge.join('') }
+  }).as('diff')
 
   Route.get('page/:page/edit', async ({ params, response, user, view, subdomains }) => {
     if (!user) return response.redirect().toRoute('authentication.login')

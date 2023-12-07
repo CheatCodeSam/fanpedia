@@ -36,6 +36,7 @@ Route.get('/', async ({ user }) => {
   .domain('fanpedia-project.com')
 
 Route.get('/s', async ({ user }) => {
+  await g.V().drop().iterate()
   const x = await g.V().count().next()
 
   return x.value
