@@ -3,6 +3,7 @@
 @section('body')
 @each(revision in revisions)
 <li>
+    <a href="{{ `/page/${request.params().page}/diff/${revision.revision.id}` }}">Diff</a><span> - </span>
     <a href="{{ 
                 route(
                     'page.show',
