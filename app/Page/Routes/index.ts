@@ -91,24 +91,28 @@ Route.group(() => {
   Route.get('page/:page', async ({ params, request, response, view, subdomains }) => {
     const { page } = params
     const { wiki } = subdomains
-    const revision: string | undefined = request.qs().revision
-    let isMainRevision = true
-    let val = g
+    const revision = (request.qs().revision as string) || ''
+
+    const PS = process.statics
+    let retval = await g
       .V()
       .has('wiki', 'slug', wiki)
       .in_('page_of')
       .has('page', 'slug', page)
-      .project('pageInfo', 'Revision')
+      .as('SelectedPage')
+      .project('pageInfo', 'Revision', 'mainId')
       .by(process.statics.elementMap('title', 'slug', 'date'))
-    if (revision) {
-      val = val.by(
-        process.statics.in_('edit_of').hasId(revision).elementMap('body', 'date', 'status')
+      .by(
+        PS.coalesce(
+          PS.in_('edit_of').hasId(revision).elementMap('body', 'date', 'status'),
+          PS.out('main').elementMap('body', 'date', 'status')
+        )
       )
-      isMainRevision = false
-    } else {
-      val = val.by(process.statics.out('main').elementMap('body', 'date', 'status'))
-    }
-    const retval = await val.next()
+      .by(PS.out('main').id())
+      .next()
+
+    let isMainRevision = revision === retval.value.get('mainId').toString() || revision === ''
+
     const md = new Converter().makeHtml(retval.value.get('Revision').get('body'))
     if (!retval.value) return response.status(404).send('Page not found.')
     return view.render('Page/show', {
