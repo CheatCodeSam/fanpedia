@@ -27,9 +27,18 @@ import 'App/Page/Routes'
 import 'App/Revision/Routes'
 import 'App/Storage/Routes'
 import 'App/Health/Routes'
+import g from '@ioc:Database/Gremlin'
 
 Route.get('/', async ({ user }) => {
   return user ? user.username : 'Not logged in'
+})
+  .middleware('authenticated')
+  .domain('fanpedia-project.com')
+
+Route.get('/s', async ({ user }) => {
+  const x = await g.V().count().next()
+
+  return x.value
 })
   .middleware('authenticated')
   .domain('fanpedia-project.com')

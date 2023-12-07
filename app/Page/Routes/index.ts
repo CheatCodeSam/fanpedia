@@ -3,6 +3,7 @@ import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { Converter } from 'showdown'
+import { MergeService, TokenizerService } from 'App/Diff/Service'
 
 const MapToObject = (map: any): object => {
   const obj = {}
@@ -99,25 +100,43 @@ Route.group(() => {
       .has('wiki', 'slug', wiki)
       .in_('page_of')
       .has('page', 'slug', page)
-      .as('SelectedPage')
-      .project('pageInfo', 'Revision', 'mainId')
-      .by(process.statics.elementMap('title', 'slug', 'date'))
+      .project('pageInfo', 'Revision', 'main')
+      .by(PS.elementMap('title', 'slug', 'date'))
       .by(
         PS.coalesce(
           PS.in_('edit_of').hasId(revision).elementMap('body', 'date', 'status'),
           PS.out('main').elementMap('body', 'date', 'status')
         )
       )
-      .by(PS.out('main').id())
+      .by(PS.out('main').elementMap('body', 'date', 'status'))
       .next()
 
-    let isMainRevision = revision === retval.value.get('mainId').toString() || revision === ''
+    const project = retval.value
+    const isMainRevision =
+      revision === project.get('main').get(process.t.id).toString() || revision === ''
 
-    const md = new Converter().makeHtml(retval.value.get('Revision').get('body'))
+    let rawBody: string = project.get('Revision').get('body')
+
+    if (!isMainRevision) {
+      const selectedRevision = revision as string
+      const commonAncestor = await g
+        .V(selectedRevision)
+        .out('branched_from')
+        .elementMap('body')
+        .next()
+      const a = TokenizerService.tokenize(project.get('main').get('body'))
+      const o = TokenizerService.tokenize(commonAncestor.value.get('body'))
+      const b = TokenizerService.tokenize(project.get('Revision').get('body'))
+      rawBody = MergeService.threeWayMerge(a, o, b).join('')
+    }
+
+    const md = new Converter().makeHtml(rawBody)
+
     if (!retval.value) return response.status(404).send('Page not found.')
+
     return view.render('Page/show', {
-      page: Object.fromEntries(retval.value.get('pageInfo')),
-      revision: Object.fromEntries(retval.value.get('Revision')),
+      page: Object.fromEntries(project.get('pageInfo')),
+      revision: Object.fromEntries(project.get('Revision')),
       body: md,
       isMainRevision: isMainRevision,
     })
