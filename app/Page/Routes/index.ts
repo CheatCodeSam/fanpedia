@@ -4,6 +4,7 @@ import { process } from 'gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { Converter } from 'showdown'
 import { DiffService, MergeService, TokenizerService } from 'App/Diff/Service'
+import { DiffChunk } from 'App/Diff/Types'
 
 const MapToObject = (map: any): object => {
   const obj = {}
@@ -167,7 +168,60 @@ Route.group(() => {
 
     const retVal = DiffService.twoWayDiff(merge, a)
 
-    return { retVal, main: project.get('main').get('body'), diffedMerge: merge.join('') }
+    const renderDiff = (a: string[], b: string[], changes: DiffChunk[]) => {
+      const changeMap = { insert: 'green', delete: 'red', replace: 'yellow' }
+
+      let aHtml = ''
+      let bHtml = ''
+      let aIndex = 0
+      let bIndex = 0
+
+      changes.forEach((change) => {
+        while (aIndex < change.startA) {
+          aHtml += `<span>${a[aIndex]}</span>`
+          bHtml += `<span>${b[bIndex]}</span>`
+          aIndex++
+          bIndex++
+        }
+
+        if (change.tag === 'insert') {
+          for (let i = change.startB; i <= change.endB; i++) {
+            if (b[i] !== undefined) {
+              bHtml += `<span style="background-color: ${changeMap.insert}">${b[i]}</span>`
+            }
+          }
+          bIndex = change.endB + 1
+        } else if (change.tag === 'delete') {
+          aHtml += `<span style="background-color: ${changeMap.delete}">${a[change.startA]}</span>`
+          aIndex++
+        } else if (change.tag === 'replace') {
+          aHtml += `<span style="background-color: ${changeMap.replace}">${a[change.startA]}</span>`
+          bHtml += `<span style="background-color: ${changeMap.replace}">${b[change.startB]}</span>`
+          aIndex++
+          bIndex++
+        }
+      })
+      while (aIndex < a.length || bIndex < b.length) {
+        if (aIndex < a.length) {
+          aHtml += `<span>${a[aIndex]}</span>`
+          aIndex++
+        }
+        if (bIndex < b.length) {
+          bHtml += `<span>${b[bIndex]}</span>`
+          bIndex++
+        }
+      }
+
+      return `<div style="display: flex;">
+                  <div style="margin-right: 20px; border: 1px solid black">${aHtml}</div>
+                  <div style="border: 1px solid black">${bHtml}</div>
+              </div>`
+    }
+
+    const flattenedArray = retVal.flatMap((item) => item[0]) as DiffChunk[]
+    console.log(flattenedArray)
+
+    return renderDiff(a, merge, flattenedArray)
   }).as('diff')
 
   Route.get('page/:page/edit', async ({ params, response, user, view, subdomains }) => {
