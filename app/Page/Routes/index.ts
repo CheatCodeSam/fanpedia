@@ -92,7 +92,7 @@ Route.group(() => {
   Route.get('page/:page', async ({ params, request, response, view, subdomains }) => {
     const { page } = params
     const { wiki } = subdomains
-    const revision = (request.qs().revision as string) || ''
+    const revision: string = request.qs().revision || ''
 
     const PS = process.statics
     let retval = await g
@@ -124,10 +124,12 @@ Route.group(() => {
         .out('branched_from')
         .elementMap('body')
         .next()
-      const a = TokenizerService.tokenize(project.get('main').get('body'))
-      const o = TokenizerService.tokenize(commonAncestor.value.get('body'))
-      const b = TokenizerService.tokenize(project.get('Revision').get('body'))
-      rawBody = MergeService.threeWayMerge(a, o, b).join('')
+      if (commonAncestor.value.get(process.t.id) !== project.get('main').get(process.t.id)) {
+        const a = TokenizerService.tokenize(project.get('main').get('body'))
+        const o = TokenizerService.tokenize(commonAncestor.value.get('body'))
+        const b = TokenizerService.tokenize(project.get('Revision').get('body'))
+        rawBody = MergeService.threeWayMerge(a, o, b).join('')
+      }
     }
 
     const md = new Converter().makeHtml(rawBody)
