@@ -90,6 +90,10 @@ Route.group(() => {
         .addE('branched_from')
         .from_('newRevision')
         .to('mergedRevision')
+        // // add branch from new revision to old main
+        .addE('branched_from')
+        .from_('newRevision')
+        .to(PS.V(project.get('main').get(process.t.id)))
         // // get page
         .V(revision)
         .out('edit_of')
