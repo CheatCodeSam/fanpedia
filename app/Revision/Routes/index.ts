@@ -3,6 +3,8 @@ import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
 import Logger from '@ioc:Adonis/Core/Logger'
 import { DiffService, MergeService, TokenizerService } from 'App/Diff/Service'
+import { MergeStatus } from 'App/Diff/Service/MergeService'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 //TODO make these post requests
 Route.group(() => {
@@ -117,7 +119,10 @@ Route.group(() => {
 
       return 'success'
     }
-  }).as('approve')
+  })
+    .as('approve')
+    .domain('fanpedia-project.com')
+
   Route.get(':revision/reject', async ({ user, response, params }) => {
     if (!user) return response.redirect('/login')
     const { revision } = params
@@ -128,9 +133,123 @@ Route.group(() => {
     await g.V(revision).property('status', 'rejected').next()
 
     return 'sucess'
-  }).as('reject')
+  })
+    .as('reject')
+    .domain('fanpedia-project.com')
+
+  Route.get(':revision/resolve', async ({ user, response, params, view }) => {
+    if (!user) return response.redirect('/login')
+    const { revision } = params
+
+    const PS = process.statics
+    const values = await g
+      .V(revision)
+      .project('revision', 'main', 'commonAncestor')
+      .by(PS.elementMap('body', 'comment'))
+      .by(PS.out('edit_of').out('main').elementMap('body'))
+      .by(PS.out('branched_from').elementMap('body'))
+      .next()
+    const project = values.value
+
+    const a = TokenizerService.tokenize(project.get('main').get('body'))
+    const o = TokenizerService.tokenize(project.get('commonAncestor').get('body'))
+    const b = TokenizerService.tokenize(project.get('revision').get('body'))
+
+    const merge = MergeService.threeWayMerge(a, o, b)
+
+    const processMerges = (mergeData: MergeStatus[]): string[] => {
+      const result: string[] = []
+      mergeData.forEach((item) => {
+        if (item.status === 'ok') {
+          result.push(item.merge)
+        } else if (item.status === 'conflict') {
+          result.push('<<<<<<<')
+          result.push(...item.a)
+          result.push('=======')
+          result.push(...item.b)
+          result.push('>>>>>>>')
+        }
+      })
+
+      return result
+    }
+
+    const mergeWithMarkers = processMerges(merge).join('')
+
+    return view.render('Revision/resolve', {
+      main: Object.fromEntries(project.get('main')),
+      revision: Object.fromEntries(project.get('revision')),
+      merge: mergeWithMarkers,
+    })
+  })
+    .as('resolve')
+    .domain(':wiki.fanpedia-project.com')
+
+  Route.post(':revision/resolve', async ({ request, response }) => {
+    const editPageSchema = schema.create({
+      body: schema.string({ trim: true }, []),
+      revision: schema.string({ trim: true }, []),
+    })
+    const { body, revision } = await request.validate({ schema: editPageSchema })
+    const now = new Date().toISOString()
+
+    const commitMessage = 'resolved conflict'
+
+    const PS = process.statics
+    const values = await g
+      .V(revision)
+      .project('main')
+      .by(PS.out('edit_of').out('main').elementMap('body'))
+      .next()
+
+    const mainId = values.value.get('main').get(process.t.id)
+
+    console.log(mainId)
+
+    const retval = await g
+      // Set initial revision to approved
+      .V(revision)
+      .property('status', 'approved')
+      .as('mergedRevision')
+      // create revision as approved revision
+      .addV('revision')
+      .property('date', now)
+      .property('status', 'approved')
+      .property('body', body)
+      .property('comment', commitMessage)
+      .as('newRevision')
+      // // add branched from new rev to old rev
+      .addE('branched_from')
+      .from_('newRevision')
+      .to('mergedRevision')
+      // // add branch from new revision to old main
+      .addE('branched_from')
+      .from_('newRevision')
+      .to(PS.V(mainId))
+      // // get page
+      .V(revision)
+      .out('edit_of')
+      .as('page')
+      // // drop main, and add main to approved revision
+      .sideEffect(PS.outE('main').drop())
+      .addE('main')
+      .from_('page')
+      .to('newRevision')
+      // Add edit of
+      .addE('edit_of')
+      .from_('newRevision')
+      .to('page')
+      // // add edited from user to revision
+      .addE('edited')
+      .from_(PS.select('mergedRevision').in_('edited'))
+      .to('newRevision')
+      .next()
+
+    return response.redirect().toPath(`/`)
+  })
+    .as('resolution')
+    .domain(':wiki.fanpedia-project.com')
 })
   .as('revision')
-  .domain('fanpedia-project.com')
   .prefix('revision')
   .middleware('authenticated')
