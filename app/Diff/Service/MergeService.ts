@@ -1,18 +1,32 @@
 import { DiffChunk } from '../Types'
 import DiffService from './DiffService'
 
+interface OkMergeStatus {
+  status: 'ok'
+  merge: string
+}
+
+interface ConflictMergeStatus {
+  status: 'conflict'
+  a: string[]
+  o: string[]
+  b: string[]
+}
+
+export type MergeStatus = OkMergeStatus | ConflictMergeStatus
+
 export default class MergeService {
   private static differ = DiffService
 
-  private static applyChange(text: string[], change: DiffChunk, mergedText: string[]): number {
+  private static applyChange(text: string[], change: DiffChunk, mergedText: MergeStatus[]): number {
     if (change.tag === 'insert') {
       for (let i = change.startB; i < change.endB; i++) {
-        mergedText.push(text[i])
+        mergedText.push({ status: 'ok', merge: text[i] })
       }
       return 0
     } else if (change.tag === 'replace') {
       for (let i = change.startB; i < change.endB; i++) {
-        mergedText.push(text[i])
+        mergedText.push({ status: 'ok', merge: text[i] })
       }
       return change.endA - change.startA
     } else {
@@ -20,11 +34,10 @@ export default class MergeService {
     }
   }
 
-  public static threeWayMerge(a: string[], o: string[], b: string[]): string[] {
-    const unresolved: number[] = []
+  public static threeWayMerge(a: string[], o: string[], b: string[]): MergeStatus[] {
     let lastLine = 0
     let mergedLine = 0
-    const mergedText: string[] = []
+    const mergedText: MergeStatus[] = []
 
     this.differ.threeWayDiff(a, o, b).forEach((change) => {
       let lowMark = lastLine
@@ -36,27 +49,50 @@ export default class MergeService {
           lowMark = change[1].startA
         }
       }
+
+      // Handle non-conflicting lines
       for (let i = lastLine; i < lowMark; i++) {
-        mergedText.push(o[i])
+        mergedText.push({ status: 'ok', merge: o[i] })
       }
       mergedLine += lowMark - lastLine
       lastLine = lowMark
 
+      // Handle conflicts
       if (change[0] !== null && change[1] !== null && change[0].tag === 'conflict') {
-        let highMark = Math.max(change[0].endA, change[1].endA)
-        // Found conflict
-      } else if (change[0] !== null) {
-        lastLine += MergeService.applyChange(a, change[0], mergedText)
-        mergedLine += change[0].endB - change[0].startB
+        const highMark = Math.max(change[0].endA, change[1].endA)
+
+        if (lowMark < highMark) {
+          for (let i = lowMark; i < highMark; i++) {
+            mergedLine += 1
+          }
+        } else {
+          mergedLine += 1
+        }
+
+        mergedText.push({
+          status: 'conflict',
+          a: a.slice(change[0].startB, change[0].endB),
+          o: o.slice(lowMark, highMark),
+          b: b.slice(change[1].startB, change[1].endB),
+        })
+
+        lastLine = highMark
       } else {
-        lastLine += MergeService.applyChange(b, change[1]!, mergedText)
-        mergedLine += change[1]!.endB - change[1]!.startB
+        // Apply changes without conflicts
+        if (change[0] !== null) {
+          lastLine += MergeService.applyChange(a, change[0], mergedText)
+          mergedLine += change[0].endB - change[0].startB
+        } else {
+          lastLine += MergeService.applyChange(b, change[1]!, mergedText)
+          mergedLine += change[1]!.endB - change[1]!.startB
+        }
       }
     })
 
+    // Add remaining original lines
     const baseLen = o.length
-    for (let i: number = lastLine; i < baseLen; i++) {
-      mergedText.push(o[i])
+    for (let i = lastLine; i < baseLen; i++) {
+      mergedText.push({ status: 'ok', merge: o[i] })
     }
 
     return mergedText
