@@ -85,9 +85,7 @@ Route.group(() => {
       .from_('b')
       .to('c')
       .next()
-    return response
-      .redirect()
-      .toRoute('page.show', { page: payload.slug }, { domain: ':wiki.fanpedia-project.com' })
+    return response.redirect().toPath(`/page/${payload.slug}`)
   }).as('store')
 
   Route.get('page/:page', async ({ params, request, response, view, subdomains }) => {
@@ -129,7 +127,16 @@ Route.group(() => {
         const a = TokenizerService.tokenize(project.get('main').get('body'))
         const o = TokenizerService.tokenize(commonAncestor.value.get('body'))
         const b = TokenizerService.tokenize(project.get('Revision').get('body'))
-        rawBody = MergeService.threeWayMerge(a, o, b).join('')
+
+        const isConflict = DiffService.threeWayDiff(a, o, b).some(
+          (item) => item[0]?.tag === 'conflict'
+        )
+
+        if (isConflict) return response.redirect().toPath(`/page/${page}/diff/${selectedRevision}`)
+
+        rawBody = MergeService.threeWayMerge(a, o, b)
+          .flatMap((item) => item.status === 'ok' && item.merge)
+          .join('')
       }
     }
 
@@ -146,83 +153,26 @@ Route.group(() => {
   }).as('show')
 
   //Temporary route
-  // Route.get('page/:page/diff/:diff', async ({ params, request, response, view, subdomains }) => {
-  //   const { page, diff } = params as Record<string, string>
-  //   const { wiki } = subdomains as Record<string, string>
+  Route.get('page/:page/diff/:diff', async ({ params, request, response, view, subdomains }) => {
+    const { page, diff } = params as Record<string, string>
+    const { wiki } = subdomains as Record<string, string>
 
-  //   const PS = process.statics
-  //   // Get a, o, and b
-  //   const values = await g
-  //     .V(diff)
-  //     .project('revision', 'main', 'commonAncestor')
-  //     .by(PS.elementMap('body', 'comment'))
-  //     .by(PS.out('edit_of').out('main').elementMap('body'))
-  //     .by(PS.out('branched_from').elementMap('body'))
-  //     .next()
-  //   const project = values.value
+    const PS = process.statics
+    const values = await g
+      .V(diff)
+      .project('revision', 'main', 'commonAncestor')
+      .by(PS.elementMap('body', 'comment'))
+      .by(PS.out('edit_of').out('main').elementMap('body'))
+      .by(PS.out('branched_from').elementMap('body'))
+      .next()
+    const project = values.value
 
-  //   const a = TokenizerService.tokenize(project.get('main').get('body'))
-  //   const o = TokenizerService.tokenize(project.get('commonAncestor').get('body'))
-  //   const b = TokenizerService.tokenize(project.get('revision').get('body'))
-  //   const merge = MergeService.threeWayMerge(a, o, b)
+    const a = TokenizerService.tokenize(project.get('main').get('body'))
+    const o = TokenizerService.tokenize(project.get('commonAncestor').get('body'))
+    const b = TokenizerService.tokenize(project.get('revision').get('body'))
 
-  //   const retVal = DiffService.twoWayDiff(merge, a)
-
-  //   const renderDiff = (a: string[], b: string[], changes: DiffChunk[]) => {
-  //     const changeMap = { insert: 'green', delete: 'red', replace: 'yellow' }
-
-  //     let aHtml = ''
-  //     let bHtml = ''
-  //     let aIndex = 0
-  //     let bIndex = 0
-
-  //     changes.forEach((change) => {
-  //       while (aIndex < change.startA) {
-  //         aHtml += `<span>${a[aIndex]}</span>`
-  //         bHtml += `<span>${b[bIndex]}</span>`
-  //         aIndex++
-  //         bIndex++
-  //       }
-
-  //       if (change.tag === 'insert') {
-  //         for (let i = change.startB; i <= change.endB; i++) {
-  //           if (b[i] !== undefined) {
-  //             bHtml += `<span style="background-color: ${changeMap.insert}">${b[i]}</span>`
-  //           }
-  //         }
-  //         bIndex = change.endB + 1
-  //       } else if (change.tag === 'delete') {
-  //         aHtml += `<span style="background-color: ${changeMap.delete}">${a[change.startA]}</span>`
-  //         aIndex++
-  //       } else if (change.tag === 'replace') {
-  //         aHtml += `<span style="background-color: ${changeMap.replace}">${a[change.startA]}</span>`
-  //         bHtml += `<span style="background-color: ${changeMap.replace}">${b[change.startB]}</span>`
-  //         aIndex++
-  //         bIndex++
-  //       }
-  //     })
-  //     while (aIndex < a.length || bIndex < b.length) {
-  //       if (aIndex < a.length) {
-  //         aHtml += `<span>${a[aIndex]}</span>`
-  //         aIndex++
-  //       }
-  //       if (bIndex < b.length) {
-  //         bHtml += `<span>${b[bIndex]}</span>`
-  //         bIndex++
-  //       }
-  //     }
-
-  //     return `<div style="display: flex;">
-  //                 <div style="margin-right: 20px; border: 1px solid black">${aHtml}</div>
-  //                 <div style="border: 1px solid black">${bHtml}</div>
-  //             </div>`
-  //   }
-
-  //   const flattenedArray = retVal.flatMap((item) => item[0]) as DiffChunk[]
-  //   console.log(flattenedArray)
-
-  //   return renderDiff(a, merge, flattenedArray)
-  // }).as('diff')
+    return { a, b }
+  }).as('diff')
 
   Route.get('page/:page/edit', async ({ params, response, user, view, subdomains }) => {
     if (!user) return response.redirect().toRoute('authentication.login')
@@ -289,9 +239,7 @@ Route.group(() => {
       .to(process.statics.V(payload.revision))
       .next()
 
-    return response
-      .redirect()
-      .toRoute('page.show', { page: page }, { domain: ':wiki.fanpedia-project.com' })
+    return response.redirect().toPath(`/page/${page}`)
   }).as('update')
 
   Route.get('page/:page/revisions', async ({ params, subdomains, response, user, view }) => {
