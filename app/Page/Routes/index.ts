@@ -171,6 +171,8 @@ Route.group(() => {
     const o = TokenizerService.tokenize(project.get('commonAncestor').get('body'))
     const b = TokenizerService.tokenize(project.get('revision').get('body'))
 
+    // Selective Three Way Merge
+
     return { a, o, b }
   }).as('diff')
 
