@@ -4,18 +4,12 @@
 @each(revision in revisions)
 <li>
     <a href="{{ `/page/${request.params().page}/diff/${revision.revision.id}` }}">Diff</a><span> - </span>
-    <a href="{{ 
-                route(
-                    'page.show',
-                    { page: request.params().page },
-                    { qs: { revision: revision.revision.id }, domain: ':wiki.fanpedia-project.com' }
-                )
-            }}">
+    <a href="{{ `/page/${request.params().page}?revision=${revision.revision.id}` }}">
         {{ revision.revision.id }}</a> - {{ revision.revision.comment }}
     - by {{ revision.user }} -
-    <a href="{{ `https://fanpedia-project.com/revision/${revision.revision.id}/approve` }}">
+    <a href="{{ `/revision/${revision.revision.id}/approve` }}">
         Approve</a> |
-    <a href="{{ route('revision.reject', {revision: revision.revision.id}, { domain: 'fanpedia-project.com' }) }}">
+    <a href="{{ `/revision/${revision.revision.id}/reject` }}">
         Reject</a> based on:
     @if(revision.basedOn.isMain)
     <b> Main </b>

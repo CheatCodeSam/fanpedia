@@ -4,7 +4,7 @@ import { process } from 'gremlin'
 import Logger from '@ioc:Adonis/Core/Logger'
 import { DiffService, MergeService, TokenizerService } from 'App/Diff/Service'
 import { MergeStatus } from 'App/Diff/Service/MergeService'
-import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import { schema } from '@ioc:Adonis/Core/Validator'
 
 //TODO make these post requests
 Route.group(() => {
@@ -66,7 +66,8 @@ Route.group(() => {
       const diffs = DiffService.threeWayDiff(a, o, b)
       // Conflicts need to be resolved somewhere else.
       for (let diff of diffs) {
-        if (diff[0]?.tag === 'conflict') return 'conflict'
+        if (diff[0]?.tag === 'conflict')
+          return response.redirect().toPath(`/revision/${revision}/resolve`)
       }
       const merge = MergeService.threeWayMerge(a, o, b).join('')
 
@@ -119,9 +120,7 @@ Route.group(() => {
 
       return 'success'
     }
-  })
-    .as('approve')
-    .domain('fanpedia-project.com')
+  }).as('approve')
 
   Route.get(':revision/reject', async ({ user, response, params }) => {
     if (!user) return response.redirect('/login')
@@ -133,9 +132,7 @@ Route.group(() => {
     await g.V(revision).property('status', 'rejected').next()
 
     return 'sucess'
-  })
-    .as('reject')
-    .domain('fanpedia-project.com')
+  }).as('reject')
 
   Route.get(':revision/resolve', async ({ user, response, params, view }) => {
     if (!user) return response.redirect('/login')
@@ -181,9 +178,7 @@ Route.group(() => {
       revision: Object.fromEntries(project.get('revision')),
       merge: mergeWithMarkers,
     })
-  })
-    .as('resolve')
-    .domain(':wiki.fanpedia-project.com')
+  }).as('resolve')
 
   Route.post(':revision/resolve', async ({ request, response }) => {
     const editPageSchema = schema.create({
@@ -246,10 +241,9 @@ Route.group(() => {
       .next()
 
     return response.redirect().toPath(`/`)
-  })
-    .as('resolution')
-    .domain(':wiki.fanpedia-project.com')
+  }).as('resolution')
 })
   .as('revision')
   .prefix('revision')
+  .domain(':wiki.fanpedia-project.com')
   .middleware('authenticated')

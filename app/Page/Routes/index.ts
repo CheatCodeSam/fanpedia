@@ -171,7 +171,7 @@ Route.group(() => {
     const o = TokenizerService.tokenize(project.get('commonAncestor').get('body'))
     const b = TokenizerService.tokenize(project.get('revision').get('body'))
 
-    return { a, b }
+    return { a, o, b }
   }).as('diff')
 
   Route.get('page/:page/edit', async ({ params, response, user, view, subdomains }) => {
