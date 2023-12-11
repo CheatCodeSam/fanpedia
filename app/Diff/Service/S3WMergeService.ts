@@ -2,17 +2,17 @@ import { OpCode } from '../Types'
 import DiffService from './DiffService'
 import MergeService from './MergeService'
 
-interface LeftSideChanges {
+export interface LeftSideChanges {
   tag: Exclude<OpCode, 'insert'>
   value: string
 }
 
-interface RightSideChanges {
+export interface RightSideChanges {
   tag: Exclude<OpCode, 'delete'>
   value: string
 }
 
-interface ReturnValue {
+export interface S3WMerge {
   l: LeftSideChanges[]
   r: RightSideChanges[]
 }
@@ -28,7 +28,7 @@ export default class S3WMergeService {
   private static merge = MergeService
   private static diff = DiffService
 
-  public static selectiveThreeWayMerge(a: string[], o: string[], b: string[]): ReturnValue {
+  public static selectiveThreeWayMerge(a: string[], o: string[], b: string[]): S3WMerge {
     const threeWayDiff = S3WMergeService.diff.threeWayDiff(a, o, b)
     const merge = S3WMergeService.merge.threeWayMerge(a, o, b)
     const bSidedMerge = merge.flatMap((item) => {

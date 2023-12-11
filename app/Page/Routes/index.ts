@@ -3,8 +3,9 @@ import g from '@ioc:Database/Gremlin'
 import { process } from 'gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { Converter } from 'showdown'
-import { DiffService, MergeService, TokenizerService } from 'App/Diff/Service'
+import { DiffService, MergeService, S3WMergeService, TokenizerService } from 'App/Diff/Service'
 import { DiffChunk } from 'App/Diff/Types'
+import { LeftSideChanges, RightSideChanges, S3WMerge } from 'App/Diff/Service/S3WMergeService'
 
 const MapToObject = (map: any): object => {
   const obj = {}
@@ -172,8 +173,42 @@ Route.group(() => {
     const b = TokenizerService.tokenize(project.get('revision').get('body'))
 
     // Selective Three Way Merge
+    const M = S3WMergeService.selectiveThreeWayMerge(a, o, b)
 
-    return { a, o, b }
+    const renderDiff = (data: S3WMerge) => {
+      // Define colors for different tags
+      const colors = {
+        conflict: 'lightcoral',
+        replace: 'lightblue',
+        insert: 'lightgreen',
+        delete: 'yellow',
+        equal: 'none',
+      }
+
+      // Function to create a single column
+      const createColumn = (items: RightSideChanges[] | LeftSideChanges[]) => {
+        return items
+          .map(
+            (item: RightSideChanges | LeftSideChanges) =>
+              `<span style="background-color: ${colors[item.tag]};">${item.value}</span>`
+          )
+          .join('')
+      }
+
+      // Splitting data into left and right columns
+      const leftColumn = createColumn(data.l)
+      const rightColumn = createColumn(data.r)
+
+      // Creating the final HTML with two columns
+      return `
+        <div style="display: flex;">
+          <div style="flex: 1; padding: 10px;">${leftColumn}</div>
+          <div style="flex: 1; padding: 10px;">${rightColumn}</div>
+        </div>
+      `
+    }
+
+    return renderDiff(M)
   }).as('diff')
 
   Route.get('page/:page/edit', async ({ params, response, user, view, subdomains }) => {
