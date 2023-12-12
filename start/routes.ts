@@ -30,16 +30,16 @@ import 'App/Health/Routes'
 import g from '@ioc:Database/Gremlin'
 
 Route.get('/', async ({ user }) => {
-  return user ? user.username : 'Not logged in'
+	return user ? user.username : 'Not logged in'
 })
-  .middleware('authenticated')
-  .domain('fanpedia-project.com')
+	.middleware('authenticated')
+	.domain('fanpedia-project.com')
 
 Route.get('/s', async ({ user }) => {
-  await g.V().drop().iterate()
-  const x = await g.V().count().next()
+	await g.V().drop().iterate()
+	const x = await g.V().count().next()
 
-  return x.value
+	return x.value
 })
-  .middleware('authenticated')
-  .domain('fanpedia-project.com')
+	.middleware('authenticated')
+	.domain('fanpedia-project.com')

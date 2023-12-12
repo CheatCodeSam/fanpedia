@@ -5,14 +5,14 @@ export type TokenClaim = 'access' | 'id'
 export type CachedJwkKeys = ReturnType<typeof createRemoteJWKSet>
 
 export interface Session {
-  sub: string
-  username: string
-  accessToken: string
-  refreshToken: string
+	sub: string
+	username: string
+	accessToken: string
+	refreshToken: string
 }
 
 export interface User {
-  userVertex: number
-  cognitoId: string
-  username: string
+	userVertex: number
+	cognitoId: string
+	username: string
 }

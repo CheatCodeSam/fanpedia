@@ -16,23 +16,23 @@ import { EncodingType } from '@aws-sdk/client-s3'
 import Env from '@ioc:Adonis/Core/Env'
 
 export default Env.rules({
-  HOST: Env.schema.string({ format: 'host' }),
-  PORT: Env.schema.number(),
-  APP_KEY: Env.schema.string(),
-  APP_NAME: Env.schema.string(),
-  CACHE_VIEWS: Env.schema.boolean(),
-  SESSION_DRIVER: Env.schema.string(),
-  DRIVE_DISK: Env.schema.enum(['local'] as const),
-  NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
+	HOST: Env.schema.string({ format: 'host' }),
+	PORT: Env.schema.number(),
+	APP_KEY: Env.schema.string(),
+	APP_NAME: Env.schema.string(),
+	CACHE_VIEWS: Env.schema.boolean(),
+	SESSION_DRIVER: Env.schema.string(),
+	DRIVE_DISK: Env.schema.enum(['local'] as const),
+	NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
 
-  URL: Env.schema.string(),
+	URL: Env.schema.string(),
 
-  GREMLIN_ENDPOINT: Env.schema.string(),
+	GREMLIN_ENDPOINT: Env.schema.string(),
 
-  REDIS_CONNECTION: Env.schema.enum(['local'] as const),
-  REDIS_HOST: Env.schema.string(),
-  REDIS_PORT: Env.schema.number(),
-  REDIS_PASSWORD: Env.schema.string.optional(),
+	REDIS_CONNECTION: Env.schema.enum(['local'] as const),
+	REDIS_HOST: Env.schema.string(),
+	REDIS_PORT: Env.schema.number(),
+	REDIS_PASSWORD: Env.schema.string.optional(),
 
-  S3_REGION: Env.schema.string(),
+	S3_REGION: Env.schema.string(),
 })
