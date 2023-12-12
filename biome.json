@@ -15,6 +15,9 @@
 				"noStaticOnlyClass": "off",
 				"noForEach": "off"
 			},
+			"correctness": {
+				"noUnusedVariables": "warn"
+			},
 			"style": {
 				"noNonNullAssertion": "off"
 			}
