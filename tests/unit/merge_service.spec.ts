@@ -207,11 +207,10 @@ test.group('MergeService', () => {
     const changes = MergeService.threeWayMerge(a, o, b)
 
     const expectedChanges = [
-      [
         { status: 'ok', merge: 'd' },
         { status: 'conflict', a: [], o: ['e', 'f', 'g'], b: ['e', 'f'] },
-      ],
     ]
+
 
     assert.deepEqual(changes, expectedChanges)
   })
