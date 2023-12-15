@@ -29,6 +29,9 @@ import 'App/Storage/Routes'
 import 'App/Health/Routes'
 import g from '@ioc:Database/Gremlin'
 
+import { sha3_256 } from '@noble/hashes/sha3'
+import { bytesToHex } from '@noble/hashes/utils'
+
 Route.get('/', async ({ user }) => {
 	return user ? user.username : 'Not logged in'
 })
@@ -36,10 +39,12 @@ Route.get('/', async ({ user }) => {
 	.domain('fanpedia-project.com')
 
 Route.get('/s', async ({ user }) => {
-	await g.V().drop().iterate()
-	const x = await g.V().count().next()
+	// await g.V().drop().iterate()
+	// const x = await g.V().count().next()
 
-	return x.value
+	const h5a = sha3_256('abc')
+
+	return bytesToHex(h5a)
 })
 	.middleware('authenticated')
 	.domain('fanpedia-project.com')
