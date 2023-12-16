@@ -9,7 +9,6 @@ import {
 	S3WMergeService,
 	TokenizerService,
 } from 'App/Diff/Service'
-import { DiffChunk } from 'App/Diff/Types'
 import {
 	LeftSideChanges,
 	RightSideChanges,
@@ -168,9 +167,8 @@ Route.group(() => {
 				}
 			}
 
-			const md = new Converter().makeHtml(rawBody)
-
 			if (!retval.value) return response.status(404).send('Page not found.')
+			console.log(rawBody)
 
 			return view.render('Page/show', {
 				page: Object.fromEntries(project.get('pageInfo')),

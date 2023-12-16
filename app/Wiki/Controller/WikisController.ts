@@ -34,6 +34,9 @@ export default class WikisController {
 			.addE('created')
 			.from_(process.statics.V(user.userVertex))
 			.to('a')
+			.addE('moderates')
+			.from_(process.statics.V(user.userVertex))
+			.to('a')
 			.next()
 		return response
 			.redirect()
