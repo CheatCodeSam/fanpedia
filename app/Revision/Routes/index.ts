@@ -74,7 +74,8 @@ Route.group(() => {
 			if (diff[0]?.tag === 'conflict')
 				return response.redirect().toPath(`/revision/${revision}/resolve`)
 		}
-		const merge = MergeService.threeWayMerge(a, o, b).join('')
+		const threeWaymerge = MergeService.threeWayMerge(a, o, b)
+		const merge = threeWaymerge.map((m) => m.status === 'ok' && m.merge)
 
 		const now = new Date().toISOString()
 
