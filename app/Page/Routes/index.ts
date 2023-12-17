@@ -41,6 +41,15 @@ Route.group(() => {
 		const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
 		if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
 		if (!user) return response.redirect().toRoute('authentication.login')
+
+		const isModerator = await g
+			.V(user.userVertex)
+			.out('moderates')
+			.has('wiki', 'slug', wiki)
+			.hasNext()
+
+		if (!isModerator) return response.status(400)
+
 		const pageSchema = schema.create({
 			title: schema.string({ trim: true }, [rules.minLength(3)]),
 			body: schema.string({ trim: true }),
