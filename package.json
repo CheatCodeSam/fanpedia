@@ -25,6 +25,7 @@
         "@types/source-map-support": "^0.5.10",
         "adonis-preset-ts": "^2.1.0",
         "autoprefixer": "^10.4.16",
+        "daisyui": "^4.4.20",
         "pino-pretty": "^10.2.3",
         "postcss": "^8.4.32",
         "postcss-loader": "^7.3.3",
