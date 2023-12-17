@@ -167,8 +167,9 @@ Route.group(() => {
 				}
 			}
 
+			const md = new Converter().makeHtml(rawBody)
+
 			if (!retval.value) return response.status(404).send('Page not found.')
-			console.log(rawBody)
 
 			return view.render('Page/show', {
 				page: Object.fromEntries(project.get('pageInfo')),
@@ -332,6 +333,12 @@ Route.group(() => {
 			const { wiki } = subdomains
 			//TODO does page and wiki exist?
 
+			const isModerator = await g
+				.V(user.userVertex)
+				.out('moderates')
+				.has('wiki', 'slug', wiki)
+				.hasNext()
+
 			const PS = process.statics
 			const x = await g
 				.V()
@@ -358,6 +365,7 @@ Route.group(() => {
 			const retVal = x.value.map((p) => MapToObject(p))
 			return view.render('Page/revisions', {
 				revisions: retVal,
+				isModerator: isModerator,
 			})
 		}
 	).as('revisions')

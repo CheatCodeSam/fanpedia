@@ -16,6 +16,15 @@ Route.group(() => {
 		const revisionExists = await g.V(revision).hasNext()
 		if (!revisionExists) return response.status(404)
 
+		const isModerator = await g
+			.V(revision)
+			.out('edit_of')
+			.out('page_of')
+			.in_('moderates')
+			.hasId(user.userVertex)
+			.hasNext()
+		if (!isModerator) return response.status(400)
+
 		const PS = process.statics
 		// Get a, o, and b
 		const values = await g
@@ -133,6 +142,15 @@ Route.group(() => {
 		if (!user) return response.redirect('/login')
 		const { revision } = params
 
+		const isModerator = await g
+			.V(revision)
+			.out('edit_of')
+			.out('page_of')
+			.in_('moderates')
+			.hasId(user.userVertex)
+			.hasNext()
+		if (!isModerator) return response.status(400)
+
 		const revisionExists = await g
 			.V(revision)
 			.has('status', 'pending')
@@ -192,7 +210,9 @@ Route.group(() => {
 		})
 	}).as('resolve')
 
-	Route.post(':revision/resolve', async ({ request, response }) => {
+	Route.post(':revision/resolve', async ({ request, response, user }) => {
+		if (!user) return response.redirect('/login')
+
 		const editPageSchema = schema.create({
 			body: schema.string({ trim: true }, []),
 			revision: schema.string({ trim: true }, []),
@@ -200,6 +220,16 @@ Route.group(() => {
 		const { body, revision } = await request.validate({
 			schema: editPageSchema,
 		})
+
+		const isModerator = await g
+			.V(revision)
+			.out('edit_of')
+			.out('page_of')
+			.in_('moderates')
+			.hasId(user.userVertex)
+			.hasNext()
+		if (!isModerator) return response.status(400)
+
 		const now = new Date().toISOString()
 
 		const commitMessage = 'resolved conflict'

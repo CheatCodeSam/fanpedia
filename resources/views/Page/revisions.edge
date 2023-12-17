@@ -6,11 +6,15 @@
     <a href="{{ `/page/${request.params().page}/diff/${revision.revision.id}` }}">Diff</a><span> - </span>
     <a href="{{ `/page/${request.params().page}?revision=${revision.revision.id}` }}">
         {{ revision.revision.id }}</a> - {{ revision.revision.comment }}
-    - by {{ revision.user }} -
+    - by {{ revision.user }}
+    @if(isModerator)
+    -
     <a href="{{ `/revision/${revision.revision.id}/approve` }}">
         Approve</a> |
     <a href="{{ `/revision/${revision.revision.id}/reject` }}">
-        Reject</a> based on:
+        Reject</a>
+    @end
+    based on:
     @if(revision.basedOn.isMain)
     <b> Main </b>
     @else
