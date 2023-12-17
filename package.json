@@ -18,6 +18,7 @@
         "@japa/preset-adonis": "^1.2.0",
         "@japa/runner": "2.5.1",
         "@symfony/webpack-encore": "4.1.1",
+        "@tailwindcss/typography": "^0.5.10",
         "@types/alpinejs": "^3.13.5",
         "@types/gremlin": "^3.6.6",
         "@types/proxy-addr": "^2.0.3",

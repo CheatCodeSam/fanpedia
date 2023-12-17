@@ -10,11 +10,9 @@
 </head>
 
 <body>
-  @if(user)
-  <div class="underline">{{ user.username }}</div>
-  @else
-  <div class="underline">No user</div>
-  @end
+
+  @include('Partials/header')
+
   @!section('body')
 </body>
 

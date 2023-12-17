@@ -7,38 +7,36 @@
 <form action="{{ route('page.update', { page: request.params().page  }, { domain: ':wiki.fanpedia-project.com' }) }}"
   method="POST">
   <div>
-    <p>
-      <label for="title">Page title</label>
-    </p>
-
-    <input type="text" value="{{page.title}}" name="title" disabled />
+    <div class="label">
+      <span class="label-text">Title</span>
+    </div>
+    <input type="text" value="{{page.title}}" class="input input-bordered" name="title" disabled />
   </div>
   <div>
-    <p>
-      <label for="slug"> Page slug </label>
-    </p>
-
-    <input type="text" name="slug" value="{{page.slug}}" disabled />
+    <div class="label">
+      <span class="label-text">Slug</span>
+    </div>
+    <input type="text" class="input input-bordered" name="slug" value="{{page.slug}}" disabled />
   </div>
 
   <div>
-    <p>
-      <label for="body"> Page body </label>
-    </p>
-    <textarea name="body" cols="30" rows="10">{{ revision.body }}</textarea>
+    <div class="label">
+      <span class="label-text">Body</span>
+    </div>
+    <textarea class="textarea textarea-bordered" name="body" cols="30" rows="10">{{ revision.body }}</textarea>
   </div>
 
   <div>
-    <p>
-      <label for="comment"> Comment </label>
-    </p>
-    <textarea name="comment" cols="30" rows="10"></textarea>
+    <div class="label">
+      <span class="label-text">Comment</span>
+    </div>
+    <textarea name="comment" class="textarea textarea-bordered" cols="30" rows="3"></textarea>
   </div>
 
   <input type="hidden" id="revision" name="revision" value="{{revision.id}}">
 
   <div>
-    <button type="submit">Page Wiki</button>
+    <button type="submit" class="btn btn-primary">Page Wiki</button>
   </div>
 </form>
 @end
