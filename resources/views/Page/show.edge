@@ -2,20 +2,31 @@
 
 @section('body')
 
-<h1 class="text-4xl font-bold">{{page.title}}</h1>
+
+<div class="flex justify-between items-start mb-6">
+    <h2 class="text-3xl font-bold">{{page.title}}</h2>
+    <div class="flex space-x-2">
+        <a class="btn btn-ghost" href="{{ `/page/${request.params().page}/edit` }}">Edit</a>
+        <a class="btn btn-ghost" href="{{ `/page/${request.params().page}/revisions` }}">Revisions</a>
+    </div>
+</div>
 <div class="prose ">{{{body}}}</div>
 
-<a class="btn btn-ghost" href="{{ `/page/${request.params().page}/edit` }}">Edit</a>
-*
-<a class="btn btn-ghost" href="{{ `/page/${request.params().page}/revisions` }}">Revisions</a>
 
-<div>
-    <div>revision id: {{revision.id}}
-        @if(isMainRevision)
-        | <b>main</b>
-        @end
-    </div>
-    <div>page created: {{page.date}}</div>
-    <div>revision created: {{revision.date}}</div>
-</div>
+<footer class="footer p-4 bg-base-300 text-base-content">
+    <aside>
+        <div>
+            <div>revision id: {{revision.id}}
+                @if(isMainRevision)
+                | <b>main</b>
+                @end
+            </div>
+            <div>page created: {{page.date}}</div>
+            <div>revision created: {{revision.date}}</div>
+        </div>
+    </aside>
+</footer>
+
+
+
 @end
