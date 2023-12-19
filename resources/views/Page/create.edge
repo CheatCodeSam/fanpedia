@@ -21,7 +21,9 @@
       <div class="label">
         <span class="label-text">Body</span>
       </div>
-      <textarea class="textarea textarea-bordered w-full" name="body" rows="10"></textarea>
+      <textarea name="body" x-data x-init="new EasyMDE({ element: $el, spellChecker: false })"></textarea>
+
+      {{-- <textarea class="textarea textarea-bordered w-full" name="body" rows="10"></textarea> --}}
     </div>
     <div>
       <button type="submit" class="btn btn-primary">Create Page</button>
