@@ -84,7 +84,9 @@ Route.group(() => {
 				return response.redirect().toPath(`/revision/${revision}/resolve`)
 		}
 		const threeWaymerge = MergeService.threeWayMerge(a, o, b)
-		const merge = threeWaymerge.map((m) => m.status === 'ok' && m.merge)
+		const merge = threeWaymerge
+			.map((m) => m.status === 'ok' && m.merge)
+			.join('')
 
 		const now = new Date().toISOString()
 
