@@ -3,32 +3,29 @@
 
 @section('body')
 
-<form action="{{ route('page.store', {}, { domain: ':wiki.fanpedia-project.com' }) }}" method="POST">
-  <div>
-    <p>
-      <label for="title"> Page title </label>
-    </p>
-
-    <input type="text" name="title" />
-  </div>
-  <div>
-    <p>
-      <label for="slug"> Page slug </label>
-    </p>
-
-    <input type="text" name="slug" />
-  </div>
-
-  <div>
-    <p>
-      <label for="body"> Page body </label>
-    </p>
-
-    <textarea name="body" cols="30" rows="10"></textarea>
-  </div>
-
-  <div>
-    <button type="submit">Page Wiki</button>
-  </div>
-</form>
+<div class="max-w-4xl mx-auto">
+  <form action="{{ " /page" }}" method="POST" class=>
+    <div>
+      <div class="label">
+        <span class="label-text">Title</span>
+      </div>
+      <input type="text" class="input input-bordered" name="title" />
+    </div>
+    <div>
+      <div class="label">
+        <span class="label-text">Slug</span>
+      </div>
+      <input type="text" class="input input-bordered" name="slug" \ />
+    </div>
+    <div>
+      <div class="label">
+        <span class="label-text">Body</span>
+      </div>
+      <textarea class="textarea textarea-bordered w-full" name="body" rows="10"></textarea>
+    </div>
+    <div>
+      <button type="submit" class="btn btn-primary">Create Page</button>
+    </div>
+  </form>
+</div>
 @end
