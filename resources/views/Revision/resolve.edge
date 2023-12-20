@@ -3,22 +3,24 @@
 
 @section('body')
 <div> Resolving {{revision.id}} so it can merge into {{ main.id }} <span class="underline">(main)</span></div>
+<div class="max-w-4xl mx-auto">
 
-<form action="{{ `/revision/${revision.id}/resolve`}}" method="POST">
-    <div>
-
+    <form action="{{ `/revision/${revision.id}/resolve`}}" method="POST">
         <div>
-            <p>
-                <label for="body"> Page body </label>
-            </p>
-            <textarea name="body" cols="30" rows="10">{{ merge }}</textarea>
-        </div>
+            <div>
+                <div class="label">
+                    <span class="label-text">Body</span>
+                </div>
+                <textarea name="body" x-data
+                    x-init="new EasyMDE({ element: $el, spellChecker: false })">{{ merge }}</textarea>
+            </div>
 
-        <input type="hidden" id="revision" name="revision" value="{{revision.id}}">
+            <input type="hidden" id="revision" name="revision" value="{{revision.id}}">
 
-        <div>
-            <button type="submit">Resolve</button>
-        </div>
-</form>
+            <div>
+                <button class="btn btn-primary" type="submit">Resolve</button>
+            </div>
+    </form>
+</div>
 
 @end

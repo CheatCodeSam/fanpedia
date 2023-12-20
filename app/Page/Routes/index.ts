@@ -244,15 +244,14 @@ Route.group(() => {
 				const rightColumn = createColumn(data.r)
 
 				// Creating the final HTML with two columns
-				return `
-        <div style="display: flex;">
-          <div style="flex: 1; padding: 10px;">${leftColumn}</div>
-          <div style="flex: 1; padding: 10px;">${rightColumn}</div>
-        </div>
-      `
+				return { leftColumn, rightColumn }
 			}
 
-			return renderDiff(M)
+			const diffs = renderDiff(M)
+
+			return view.render('Page/diff', {
+				diffs,
+			})
 		}
 	).as('diff')
 

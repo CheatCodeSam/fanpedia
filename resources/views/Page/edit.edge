@@ -4,39 +4,45 @@
 @section('body')
 <div>You are making a modification to revision {{revision.id}}</div>
 <div>previous editor: {{previousEditor.username}}</div>
-<form action="{{ route('page.update', { page: request.params().page  }, { domain: ':wiki.fanpedia-project.com' }) }}"
-  method="POST">
-  <div>
-    <div class="label">
-      <span class="label-text">Title</span>
-    </div>
-    <input type="text" value="{{page.title}}" class="input input-bordered" name="title" disabled />
-  </div>
-  <div>
-    <div class="label">
-      <span class="label-text">Slug</span>
-    </div>
-    <input type="text" class="input input-bordered" name="slug" value="{{page.slug}}" disabled />
-  </div>
 
-  <div>
-    <div class="label">
-      <span class="label-text">Body</span>
+<div class="max-w-4xl mx-auto">
+
+  <form action="{{ route('page.update', { page: request.params().page  }, { domain: ':wiki.fanpedia-project.com' }) }}"
+    method="POST">
+    <div>
+      <div class="label">
+        <span class="label-text">Title</span>
+      </div>
+      <input type="text" value="{{page.title}}" class="input input-bordered" name="title" disabled />
     </div>
-    <textarea class="textarea textarea-bordered" name="body" cols="30" rows="10">{{ revision.body }}</textarea>
-  </div>
-
-  <div>
-    <div class="label">
-      <span class="label-text">Comment</span>
+    <div>
+      <div class="label">
+        <span class="label-text">Slug</span>
+      </div>
+      <input type="text" class="input input-bordered" name="slug" value="{{page.slug}}" disabled />
     </div>
-    <textarea name="comment" class="textarea textarea-bordered" cols="30" rows="3"></textarea>
-  </div>
 
-  <input type="hidden" id="revision" name="revision" value="{{revision.id}}">
+    <div>
+      <div class="label">
+        <span class="label-text">Body</span>
+      </div>
+      <textarea name="body" x-data
+        x-init="new EasyMDE({ element: $el, spellChecker: false })">{{ revision.body }}</textarea>
 
-  <div>
-    <button type="submit" class="btn btn-primary">Page Wiki</button>
-  </div>
-</form>
+    </div>
+
+    <div>
+      <div class="label">
+        <span class="label-text">Comment</span>
+      </div>
+      <textarea name="comment" class="textarea textarea-bordered" cols="30" rows="3"></textarea>
+    </div>
+
+    <input type="hidden" id="revision" name="revision" value="{{revision.id}}">
+
+    <div>
+      <button type="submit" class="btn btn-primary">Page Wiki</button>
+    </div>
+  </form>
+</div>
 @end
