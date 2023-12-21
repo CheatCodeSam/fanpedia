@@ -35,4 +35,12 @@ export default Env.rules({
 	REDIS_PASSWORD: Env.schema.string.optional(),
 
 	S3_REGION: Env.schema.string(),
+
+	COGNITO_CLIENT_ID: Env.schema.string(),
+	COGNITO_CLIENT_SECRET: Env.schema.string(),
+	COGNITO_CALLBACK_URL: Env.schema.string(),
+	COGNITO_LOGOUT_URL: Env.schema.string(),
+	COGNITO_DOMAIN: Env.schema.string(),
+	COGNITO_REGION: Env.schema.string(),
+	COGNITO_USER_ID_POOL: Env.schema.string(),
 })
