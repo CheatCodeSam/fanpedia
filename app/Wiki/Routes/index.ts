@@ -28,6 +28,7 @@ Route.group(() => {
 	})
 		.as('show')
 		.domain(':wiki.fanpedia-project.com')
+		.middleware('wiki')
 })
 	.as('wiki')
 	.middleware('authenticated')

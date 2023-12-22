@@ -1,7 +1,8 @@
 @layout('Layouts/main')
 
-@section('body')
+@set('title', page.title)
 
+@section('body')
 <div class="max-w-4xl mx-auto">
 
     <div class="flex justify-between items-center mb-6 border-b border-primary-content pb-2">
@@ -27,7 +28,4 @@
         </div>
     </aside>
 </footer>
-
-
-
 @end

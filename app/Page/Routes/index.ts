@@ -380,4 +380,4 @@ Route.group(() => {
 })
 	.as('page')
 	.domain(':wiki.fanpedia-project.com')
-	.middleware('authenticated')
+	.middleware(['authenticated', 'wiki'])
