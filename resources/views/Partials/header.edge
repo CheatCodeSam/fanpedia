@@ -17,8 +17,11 @@
         </details>
       </li>
       @else
-      <li><a href="https://fanpedia-project.com/login">Login</a></li>
+      <li><a
+          href="https://fanpedia-project.com/login/?redirect={{Buffer.from(`${request.host()}${request.url(true)}`).toString('base64')}}">Login</a>
+      </li>
       @end
     </ul>
+
   </div>
 </div>

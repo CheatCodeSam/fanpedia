@@ -11,7 +11,7 @@ import { process } from 'gremlin'
 
 Route.group(() => {
 	Route.get('/callback', async ({ request, response }) => {
-		const { code } = request.qs()
+		const { code, state } = request.qs()
 		if (!code) {
 			response.status(400).send('No authorization code provided.')
 			return
@@ -50,17 +50,21 @@ Route.group(() => {
 			response.cookie('oidc_session', sessionId, {
 				domain: 'fanpedia-project.com',
 			})
-			response.redirect('/')
+			const re = JSON.parse(state).re
+			response.redirect(
+				re ? `https://${Buffer.from(re, 'base64').toString('ascii')}` : '/'
+			)
 		} catch (error: any) {
 			console.log(error)
 			response.status(500).send('error')
 		}
 	}).as('callback')
 
-	Route.get('/login', async ({ response }) => {
+	Route.get('/login', async ({ response, request }) => {
+		const redirect = request.qs().redirect || ''
 		const scope = encodeURIComponent('openid profile phone email')
 		const responseType = 'code'
-		const authUrl = `https://${config.domain}.auth.${config.region}.amazoncognito.com/login?response_type=${responseType}&client_id=${config.client_id}&redirect_uri=${config.callback_url}&scope=${scope}`
+		const authUrl = `https://${config.domain}.auth.${config.region}.amazoncognito.com/login?response_type=${responseType}&client_id=${config.client_id}&redirect_uri=${config.callback_url}&scope=${scope}&state={"re":"${redirect}"}`
 		response.redirect(authUrl)
 	}).as('login')
 

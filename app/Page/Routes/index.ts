@@ -28,18 +28,14 @@ const MapToObject = (map: any): object => {
 }
 
 Route.group(() => {
-	Route.get('page/create', async ({ user, subdomains, response, view }) => {
-		const { wiki } = subdomains
-		const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
-		if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
+	Route.get('page/create', async ({ user, response, view }) => {
 		if (!user) return response.redirect().toRoute('authentication.login')
 		return view.render('Page/create')
 	}).as('create')
 
 	Route.post('page', async ({ request, user, response, subdomains }) => {
 		const { wiki } = subdomains
-		const doesWikiExist = await g.V().has('wiki', 'slug', wiki).hasNext()
-		if (!doesWikiExist) return response.status(400).send('Wiki does not exists')
+
 		if (!user) return response.redirect().toRoute('authentication.login')
 
 		const isModerator = await g
