@@ -20,8 +20,6 @@ export default class WikiMiddleware {
 			return response.badRequest('Wiki does not exist')
 		}
 
-		console.log(wikiResult.value)
-
 		view.share({ wiki: Object.fromEntries(wikiResult.value) })
 		return next()
 	}
