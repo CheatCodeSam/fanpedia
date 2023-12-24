@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import g from '@ioc:Database/Gremlin'
+import type { WikiMetadata } from '../Types'
 
 export default class WikiMiddleware {
 	public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
@@ -12,7 +13,7 @@ export default class WikiMiddleware {
 			.elementMap()
 			.next()
 		if (!wikiResult.value) return response.badRequest('Wiki does not exist')
-		ctx.wiki = Object.fromEntries(wikiResult.value) as any
+		ctx.wiki = Object.fromEntries(wikiResult.value) as WikiMetadata
 		view.share({ wiki: Object.fromEntries(wikiResult.value) })
 		return next()
 	}

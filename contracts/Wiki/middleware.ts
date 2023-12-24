@@ -1,11 +1,7 @@
 declare module '@ioc:Adonis/Core/HttpContext' {
+	import type { WikiMetadata } from 'App/Wiki/Types'
+
 	interface HttpContextContract {
-		wiki: {
-			description: string
-			title: string
-			slug: string
-			id: number
-			label: string
-		}
+		wiki: WikiMetadata
 	}
 }
