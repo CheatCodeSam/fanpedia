@@ -1,0 +1,10 @@
+@layout('Layouts/main')
+
+@section('body')
+@each(wiki in wikis)
+<li>
+  <a href="{{ `https://${wiki.slug}.fanpedia-project.com`  }}"> {{ wiki.title }} </a>
+</li>
+@end
+<a class="btn btn-primary" href="/wiki/create">Create new wiki</a>
+@end

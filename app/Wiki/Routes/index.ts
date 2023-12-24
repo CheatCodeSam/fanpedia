@@ -50,6 +50,14 @@ Route.group(() => {
 		.as('store')
 		.domain('fanpedia-project.com')
 
+	Route.get('wiki', async ({ view }) => {
+		const wikiQuery = await g.V().hasLabel('wiki').elementMap().fold().next()
+		const wikis = wikiQuery.value.map((w) => MapToObjectService.toObject(w))
+		return view.render('Wiki/list', { wikis })
+	})
+		.as('list')
+		.domain('fanpedia-project.com')
+
 	Route.get('/', async ({ view, wiki }) => {
 		const pages = await g.V(wiki.id).in_('page_of').elementMap().fold().next()
 		const pagesobj = pages.value.map((p) => MapToObjectService.toObject(p))
