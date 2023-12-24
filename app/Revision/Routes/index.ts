@@ -96,7 +96,7 @@ Route.group(() => {
 			.get('revision')
 			.get(process.t.id)} - ${project.get('revision').get('comment')}`
 
-		const retval = await g
+		await g
 			// Set initial revision to approved
 			.V(revision)
 			.property('status', 'approved')
@@ -134,8 +134,6 @@ Route.group(() => {
 			.from_(process.statics.select('mergedRevision').in_('edited'))
 			.to('newRevision')
 			.next()
-
-		const val = retval.value
 
 		return 'success'
 	}).as('approve')
@@ -247,7 +245,7 @@ Route.group(() => {
 
 		console.log(mainId)
 
-		const retval = await g
+		await g
 			// Set initial revision to approved
 			.V(revision)
 			.property('status', 'approved')

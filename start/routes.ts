@@ -19,7 +19,6 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
-import Redis from '@ioc:Adonis/Addons/Redis'
 
 import 'App/Authentication/Routes'
 import 'App/Wiki/Routes'
@@ -27,7 +26,6 @@ import 'App/Page/Routes'
 import 'App/Revision/Routes'
 import 'App/Storage/Routes'
 import 'App/Health/Routes'
-import g from '@ioc:Database/Gremlin'
 
 import { sha3_256 } from '@noble/hashes/sha3'
 import { bytesToHex } from '@noble/hashes/utils'
@@ -38,7 +36,7 @@ Route.get('/', async ({ user }) => {
 	.middleware('authenticated')
 	.domain('fanpedia-project.com')
 
-Route.get('/s', async ({ user }) => {
+Route.get('/s', async ({  }) => {
 	const h5a = sha3_256('abc')
 
 	return bytesToHex(h5a)

@@ -43,7 +43,6 @@ export default class MergeService {
 		b: string[]
 	): MergeStatus[] {
 		let lastLine = 0
-		let mergedLine = 0
 		const mergedText: MergeStatus[] = []
 
 		MergeService.differ.threeWayDiff(a, o, b).forEach((change) => {
@@ -61,7 +60,6 @@ export default class MergeService {
 			for (let i = lastLine; i < lowMark; i++) {
 				mergedText.push({ status: 'ok', merge: o[i] })
 			}
-			mergedLine += lowMark - lastLine
 			lastLine = lowMark
 
 			// Handle conflicts
@@ -71,14 +69,6 @@ export default class MergeService {
 				change[0].tag === 'conflict'
 			) {
 				const highMark = Math.max(change[0].endA, change[1].endA)
-
-				if (lowMark < highMark) {
-					for (let i = lowMark; i < highMark; i++) {
-						mergedLine += 1
-					}
-				} else {
-					mergedLine += 1
-				}
 
 				mergedText.push({
 					status: 'conflict',
@@ -92,10 +82,8 @@ export default class MergeService {
 				// Apply changes without conflicts
 				if (change[0] !== null) {
 					lastLine += MergeService.applyChange(a, change[0], mergedText)
-					mergedLine += change[0].endB - change[0].startB
 				} else {
 					lastLine += MergeService.applyChange(b, change[1]!, mergedText)
-					mergedLine += change[1]!.endB - change[1]!.startB
 				}
 			}
 		})

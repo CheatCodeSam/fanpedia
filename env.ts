@@ -12,7 +12,6 @@
 |
 */
 
-import { EncodingType } from '@aws-sdk/client-s3'
 import Env from '@ioc:Adonis/Core/Env'
 
 export default Env.rules({

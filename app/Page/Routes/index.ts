@@ -188,9 +188,8 @@ Route.group(() => {
 	//Temporary route
 	Route.get(
 		'page/:page/diff/:diff',
-		async ({ params, request, response, view, subdomains }) => {
-			const { page, diff } = params as Record<string, string>
-			const { wiki } = subdomains as Record<string, string>
+		async ({ params, view }) => {
+			const { diff } = params as Record<string, string>
 
 			const PS = process.statics
 			const values = await g
