@@ -13,7 +13,6 @@
 	},
 	"preloads": ["./start/routes", "./start/kernel"],
 	"providers": [
-		"./providers/AppProvider",
 		"./providers/Database/GremlinProvider",
 		"./providers/Authentication/CognitoProvider",
 		"./providers/Storage/S3Provider",
