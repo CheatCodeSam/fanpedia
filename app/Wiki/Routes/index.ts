@@ -6,7 +6,7 @@ import { process } from 'gremlin'
 Route.group(() => {
 	Route.get('wiki/create', async ({ user, view, response }) => {
 		if (user) return view.render('Wiki/create')
-		return response.redirect().toRoute('authentication.login')
+		return response.redirect('https://fanpedia-project.com/login')
 	})
 		.as('create')
 		.domain('fanpedia-project.com')

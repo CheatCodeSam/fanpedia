@@ -10,7 +10,7 @@ import { schema } from '@ioc:Adonis/Core/Validator'
 Route.group(() => {
 	Route.get(':revision/approve', async ({ params, user, response }) => {
 		// Does the revision exists? And is the user logged in?
-		if (!user) return response.redirect('/login')
+		if (!user) return response.redirect('https://fanpedia-project.com/login')
 		const { revision } = params
 
 		const revisionExists = await g.V(revision).hasNext()
@@ -139,7 +139,8 @@ Route.group(() => {
 	}).as('approve')
 
 	Route.get(':revision/reject', async ({ user, response, params }) => {
-		if (!user) return response.redirect('/login')
+		if (!user) return response.redirect('https://fanpedia-project.com/login')
+
 		const { revision } = params
 
 		const isModerator = await g
@@ -163,7 +164,7 @@ Route.group(() => {
 	}).as('reject')
 
 	Route.get(':revision/resolve', async ({ user, response, params, view }) => {
-		if (!user) return response.redirect('/login')
+		if (!user) return response.redirect('https://fanpedia-project.com/login')
 		const { revision } = params
 
 		const PS = process.statics

@@ -29,14 +29,15 @@ const MapToObject = (map: any): object => {
 
 Route.group(() => {
 	Route.get('page/create', async ({ user, response, view }) => {
-		if (!user) return response.redirect().toRoute('authentication.login')
+		if (!user) return response.redirect('https://fanpedia-project.com/login')
+
 		return view.render('Page/create')
 	}).as('create')
 
 	Route.post('page', async ({ request, user, response, subdomains }) => {
 		const { wiki } = subdomains
 
-		if (!user) return response.redirect().toRoute('authentication.login')
+		if (!user) return response.redirect('https://fanpedia-project/login')
 
 		const isModerator = await g
 			.V(user.userVertex)
@@ -186,74 +187,70 @@ Route.group(() => {
 	).as('show')
 
 	//Temporary route
-	Route.get(
-		'page/:page/diff/:diff',
-		async ({ params, view }) => {
-			const { diff } = params as Record<string, string>
+	Route.get('page/:page/diff/:diff', async ({ params, view }) => {
+		const { diff } = params as Record<string, string>
 
-			const PS = process.statics
-			const values = await g
-				.V(diff)
-				.project('revision', 'main', 'commonAncestor')
-				.by(PS.elementMap('body', 'comment'))
-				.by(PS.out('edit_of').out('main').elementMap('body'))
-				.by(PS.out('branched_from').elementMap('body'))
-				.next()
-			const project = values.value
+		const PS = process.statics
+		const values = await g
+			.V(diff)
+			.project('revision', 'main', 'commonAncestor')
+			.by(PS.elementMap('body', 'comment'))
+			.by(PS.out('edit_of').out('main').elementMap('body'))
+			.by(PS.out('branched_from').elementMap('body'))
+			.next()
+		const project = values.value
 
-			const a = TokenizerService.tokenize(project.get('main').get('body'))
-			const o = TokenizerService.tokenize(
-				project.get('commonAncestor').get('body')
-			)
-			const b = TokenizerService.tokenize(project.get('revision').get('body'))
+		const a = TokenizerService.tokenize(project.get('main').get('body'))
+		const o = TokenizerService.tokenize(
+			project.get('commonAncestor').get('body')
+		)
+		const b = TokenizerService.tokenize(project.get('revision').get('body'))
 
-			// Selective Three Way Merge
-			const M = S3WMergeService.selectiveThreeWayMerge(a, o, b)
+		// Selective Three Way Merge
+		const M = S3WMergeService.selectiveThreeWayMerge(a, o, b)
 
-			const renderDiff = (data: S3WMerge) => {
-				// Define colors for different tags
-				const colors = {
-					conflict: 'lightcoral',
-					replace: 'lightblue',
-					insert: 'lightgreen',
-					delete: 'yellow',
-					equal: 'none',
-				}
-
-				// Function to create a single column
-				const createColumn = (
-					items: RightSideChanges[] | LeftSideChanges[]
-				) => {
-					return items
-						.map(
-							(item: RightSideChanges | LeftSideChanges) =>
-								`<span style="background-color: ${colors[item.tag]};">${
-									item.value
-								}</span>`
-						)
-						.join('')
-				}
-
-				// Splitting data into left and right columns
-				const leftColumn = createColumn(data.l)
-				const rightColumn = createColumn(data.r)
-
-				// Creating the final HTML with two columns
-				return { leftColumn, rightColumn }
+		const renderDiff = (data: S3WMerge) => {
+			// Define colors for different tags
+			const colors = {
+				conflict: 'lightcoral',
+				replace: 'lightblue',
+				insert: 'lightgreen',
+				delete: 'yellow',
+				equal: 'none',
 			}
 
-			const diffs = renderDiff(M)
+			// Function to create a single column
+			const createColumn = (items: RightSideChanges[] | LeftSideChanges[]) => {
+				return items
+					.map(
+						(item: RightSideChanges | LeftSideChanges) =>
+							`<span style="background-color: ${colors[item.tag]};">${
+								item.value
+							}</span>`
+					)
+					.join('')
+			}
 
-			return view.render('Page/diff', {
-				diffs,
-			})
+			// Splitting data into left and right columns
+			const leftColumn = createColumn(data.l)
+			const rightColumn = createColumn(data.r)
+
+			// Creating the final HTML with two columns
+			return { leftColumn, rightColumn }
 		}
-	).as('diff')
+
+		const diffs = renderDiff(M)
+
+		return view.render('Page/diff', {
+			diffs,
+		})
+	}).as('diff')
 
 	Route.get(
 		'page/:page/edit',
 		async ({ params, response, user, view, subdomains }) => {
-			if (!user) return response.redirect().toRoute('authentication.login')
+			if (!user) return response.redirect('https://fanpedia-project.com/login')
+
 			const { page } = params
 			const { wiki } = subdomains
 			const wikiPage = await g
@@ -283,7 +280,8 @@ Route.group(() => {
 			const { page } = params
 			const { wiki } = subdomains
 			//TODO What if wiki/page doesnt exist?
-			if (!user) return response.status(400).send('no user')
+			if (!user) return response.redirect('https://fanpedia-project.com/login')
+
 			const editPageSchema = schema.create({
 				body: schema.string({ trim: true }, []),
 				comment: schema.string({ trim: true }, []),
@@ -330,17 +328,17 @@ Route.group(() => {
 
 	Route.get(
 		'page/:page/revisions',
-		async ({ params, subdomains, response, user, view }) => {
-			if (!user) return response.redirect().toRoute('authentication.login')
+		async ({ params, subdomains, user, view }) => {
 			const { page } = params
 			const { wiki } = subdomains
 			//TODO does page and wiki exist?
-
-			const isModerator = await g
-				.V(user.userVertex)
-				.out('moderates')
-				.has('wiki', 'slug', wiki)
-				.hasNext()
+			let isModerator = false
+			if (user)
+				isModerator = await g
+					.V(user.userVertex)
+					.out('moderates')
+					.has('wiki', 'slug', wiki)
+					.hasNext()
 
 			const PS = process.statics
 			const x = await g
