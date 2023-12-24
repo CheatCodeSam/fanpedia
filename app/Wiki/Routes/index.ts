@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route'
 import g from '@ioc:Database/Gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { process } from 'gremlin'
+import { MapToObjectService } from 'App/Util/Service'
 
 Route.group(() => {
 	Route.get('wiki/create', async ({ user, view, response }) => {
@@ -49,18 +50,9 @@ Route.group(() => {
 		.as('store')
 		.domain('fanpedia-project.com')
 
-	Route.get('/', async ({ subdomains, view }) => {
-		const { wiki } = subdomains
-		const pages = await g
-			.V()
-			.has('wiki', 'slug', wiki)
-			.in_('page_of')
-			.elementMap()
-			.fold()
-			.next()
-		const pagesobj = pages.value.map((p: Map<any, any>) =>
-			Object.fromEntries(p)
-		)
+	Route.get('/', async ({ view, wiki }) => {
+		const pages = await g.V(wiki.id).in_('page_of').elementMap().fold().next()
+		const pagesobj = pages.value.map((p) => MapToObjectService.toObject(p))
 		return view.render('Wiki/show', { pages: pagesobj })
 	})
 		.as('show')

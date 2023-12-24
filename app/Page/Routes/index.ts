@@ -14,18 +14,7 @@ import {
 	RightSideChanges,
 	S3WMerge,
 } from 'App/Diff/Service/S3WMergeService'
-
-const MapToObject = (map: any): object => {
-	const obj = {}
-	for (const [key, value] of map) {
-		if (value instanceof Map) {
-			obj[key] = MapToObject(value)
-		} else {
-			obj[key] = value
-		}
-	}
-	return obj
-}
+import { MapToObjectService } from 'App/Util/Service'
 
 Route.group(() => {
 	Route.get('page/create', async ({ user, response, view }) => {
@@ -178,8 +167,8 @@ Route.group(() => {
 			if (!retval.value) return response.status(404).send('Page not found.')
 
 			return view.render('Page/show', {
-				page: Object.fromEntries(project.get('pageInfo')),
-				revision: Object.fromEntries(project.get('Revision')),
+				page: MapToObjectService.toObject(project.get('pageInfo')),
+				revision: MapToObjectService.toObject(project.get('Revision')),
 				body: md,
 				isMainRevision: isMainRevision,
 			})
@@ -265,9 +254,11 @@ Route.group(() => {
 				.next()
 			if (!wikiPage) return response.status(400).send('Wiki does not exists')
 			return view.render('Page/edit', {
-				page: Object.fromEntries(wikiPage.value.get('pageInfo')),
-				revision: Object.fromEntries(wikiPage.value.get('mainRevision')),
-				previousEditor: Object.fromEntries(
+				page: MapToObjectService.toObject(wikiPage.value.get('pageInfo')),
+				revision: MapToObjectService.toObject(
+					wikiPage.value.get('mainRevision')
+				),
+				previousEditor: MapToObjectService.toObject(
 					wikiPage.value.get('previousEditor')
 				),
 			})
@@ -363,7 +354,7 @@ Route.group(() => {
 				)
 				.fold()
 				.next()
-			const retVal = x.value.map((p) => MapToObject(p))
+			const retVal = x.value.map((p) => MapToObjectService.toObject(p))
 			return view.render('Page/revisions', {
 				revisions: retVal,
 				isModerator: isModerator,
