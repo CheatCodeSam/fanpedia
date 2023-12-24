@@ -19,19 +19,16 @@ import { MapToObjectService } from 'App/Util/Service'
 Route.group(() => {
 	Route.get('page/create', async ({ user, response, view }) => {
 		if (!user) return response.redirect('https://fanpedia-project.com/login')
-
 		return view.render('Page/create')
 	}).as('create')
 
-	Route.post('page', async ({ request, user, response, subdomains }) => {
-		const { wiki } = subdomains
-
+	Route.post('page', async ({ request, user, response, wiki }) => {
 		if (!user) return response.redirect('https://fanpedia-project/login')
 
 		const isModerator = await g
 			.V(user.userVertex)
 			.out('moderates')
-			.has('wiki', 'slug', wiki)
+			.hasId(wiki.id)
 			.hasNext()
 
 		if (!isModerator) return response.status(400)
@@ -43,10 +40,10 @@ Route.group(() => {
 				rules.regex(/^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/),
 			]),
 		})
+
 		const payload = await request.validate({ schema: pageSchema })
 		const doesPageAlreadyExists = await g
-			.V()
-			.has('wiki', 'slug', wiki)
+			.V(wiki.id)
 			.out()
 			.has('page', 'slug', payload.slug)
 			.hasNext()
@@ -73,7 +70,7 @@ Route.group(() => {
 			// page is a page of the wiki
 			.addE('page_of')
 			.from_('a')
-			.to(process.statics.V().has('wiki', 'slug', wiki))
+			.to(process.statics.V(wiki.id))
 			// Create a new vertex for the page's initial revision
 			.addV('revision')
 			.as('c')
@@ -99,15 +96,13 @@ Route.group(() => {
 
 	Route.get(
 		'page/:page',
-		async ({ params, request, response, view, subdomains }) => {
+		async ({ params, request, response, view, wiki }) => {
 			const { page } = params
-			const { wiki } = subdomains
 			const revision: string = request.qs().revision || ''
 
 			const PS = process.statics
 			const retval = await g
-				.V()
-				.has('wiki', 'slug', wiki)
+				.V(wiki.id)
 				.in_('page_of')
 				.has('page', 'slug', page)
 				.project('pageInfo', 'Revision', 'main')
@@ -237,14 +232,11 @@ Route.group(() => {
 
 	Route.get(
 		'page/:page/edit',
-		async ({ params, response, user, view, subdomains }) => {
+		async ({ params, response, user, view, wiki }) => {
 			if (!user) return response.redirect('https://fanpedia-project.com/login')
-
 			const { page } = params
-			const { wiki } = subdomains
 			const wikiPage = await g
-				.V()
-				.has('wiki', 'slug', wiki)
+				.V(wiki.id)
 				.in_('page_of')
 				.has('page', 'slug', page)
 				.project('pageInfo', 'mainRevision', 'previousEditor')
@@ -267,9 +259,9 @@ Route.group(() => {
 
 	Route.post(
 		'page/:page',
-		async ({ params, response, user, subdomains, request }) => {
+		async ({ params, response, user, wiki, request }) => {
 			const { page } = params
-			const { wiki } = subdomains
+
 			//TODO What if wiki/page doesnt exist?
 			if (!user) return response.redirect('https://fanpedia-project.com/login')
 
@@ -292,8 +284,7 @@ Route.group(() => {
 				.property('body', formattedBody)
 				.property('comment', payload.comment)
 				// get page vertex as b
-				.V()
-				.has('wiki', 'slug', wiki)
+				.V(wiki.id)
 				.in_('page_of')
 				.has('page', 'slug', page)
 				.as('b')
@@ -317,50 +308,45 @@ Route.group(() => {
 		}
 	).as('update')
 
-	Route.get(
-		'page/:page/revisions',
-		async ({ params, subdomains, user, view }) => {
-			const { page } = params
-			const { wiki } = subdomains
-			//TODO does page and wiki exist?
-			let isModerator = false
-			if (user)
-				isModerator = await g
-					.V(user.userVertex)
-					.out('moderates')
-					.has('wiki', 'slug', wiki)
-					.hasNext()
+	Route.get('page/:page/revisions', async ({ params, wiki, user, view }) => {
+		const { page } = params
+		//TODO does page and wiki exist?
+		let isModerator = false
+		if (user)
+			isModerator = await g
+				.V(user.userVertex)
+				.out('moderates')
+				.hasId(wiki.id)
+				.hasNext()
 
-			const PS = process.statics
-			const x = await g
-				.V()
-				.has('wiki', 'slug', wiki)
-				.in_('page_of')
-				.has('page', 'slug', page)
-				.in_('edit_of')
-				.has('revision', 'status', 'pending')
-				.project('revision', 'user', 'basedOn')
-				.by(PS.elementMap())
-				.by(PS.in_('edited').values('username'))
-				.by(
-					PS.project('revision', 'isMain')
-						.by(PS.out('branched_from').elementMap('date', 'id'))
-						.by(
-							PS.coalesce(
-								PS.out('branched_from').inE('main').constant(true),
-								PS.constant(false)
-							)
+		const PS = process.statics
+		const x = await g
+			.V(wiki.id)
+			.in_('page_of')
+			.has('page', 'slug', page)
+			.in_('edit_of')
+			.has('revision', 'status', 'pending')
+			.project('revision', 'user', 'basedOn')
+			.by(PS.elementMap())
+			.by(PS.in_('edited').values('username'))
+			.by(
+				PS.project('revision', 'isMain')
+					.by(PS.out('branched_from').elementMap('date', 'id'))
+					.by(
+						PS.coalesce(
+							PS.out('branched_from').inE('main').constant(true),
+							PS.constant(false)
 						)
-				)
-				.fold()
-				.next()
-			const retVal = x.value.map((p) => MapToObjectService.toObject(p))
-			return view.render('Page/revisions', {
-				revisions: retVal,
-				isModerator: isModerator,
-			})
-		}
-	).as('revisions')
+					)
+			)
+			.fold()
+			.next()
+		const retVal = x.value.map((p) => MapToObjectService.toObject(p))
+		return view.render('Page/revisions', {
+			revisions: retVal,
+			isModerator: isModerator,
+		})
+	}).as('revisions')
 })
 	.as('page')
 	.domain(':wiki.fanpedia-project.com')
