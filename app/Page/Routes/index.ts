@@ -15,14 +15,17 @@ import {
 	S3WMerge,
 } from 'App/Diff/Service/S3WMergeService'
 import { MapToObjectService } from 'App/Util/Service'
+import WikiService from 'App/Wiki/Service/WikiService'
 
 Route.group(() => {
-	Route.get('page/create', async ({ user, response, view }) => {
+	Route.get('page/create', async ({ user, response, view, subdomains }) => {
+		await WikiService.getWikiBySubdomains(subdomains, view)
 		if (!user) return response.redirect('https://fanpedia-project.com/login')
 		return view.render('Page/create')
 	}).as('create')
 
-	Route.post('page', async ({ request, user, response, wiki }) => {
+	Route.post('page', async ({ request, user, response, view, subdomains }) => {
+		const wiki = await WikiService.getWikiBySubdomains(subdomains, view)
 		if (!user) return response.redirect('https://fanpedia-project/login')
 
 		const isModerator = await g
@@ -96,7 +99,8 @@ Route.group(() => {
 
 	Route.get(
 		'page/:page',
-		async ({ params, request, response, view, wiki }) => {
+		async ({ params, request, response, view, subdomains }) => {
+			const wiki = await WikiService.getWikiBySubdomains(subdomains, view)
 			const { page } = params
 			const revision: string = request.qs().revision || ''
 
@@ -171,7 +175,9 @@ Route.group(() => {
 	).as('show')
 
 	//Temporary route
-	Route.get('page/:page/diff/:diff', async ({ params, view }) => {
+	Route.get('page/:page/diff/:diff', async ({ params, view, subdomains }) => {
+		await WikiService.getWikiBySubdomains(subdomains, view)
+
 		const { diff } = params as Record<string, string>
 
 		const PS = process.statics
@@ -232,7 +238,8 @@ Route.group(() => {
 
 	Route.get(
 		'page/:page/edit',
-		async ({ params, response, user, view, wiki }) => {
+		async ({ params, response, user, view, subdomains }) => {
+			const wiki = await WikiService.getWikiBySubdomains(subdomains, view)
 			if (!user) return response.redirect('https://fanpedia-project.com/login')
 			const { page } = params
 			const wikiPage = await g
@@ -259,9 +266,9 @@ Route.group(() => {
 
 	Route.post(
 		'page/:page',
-		async ({ params, response, user, wiki, request }) => {
+		async ({ params, response, user, subdomains, request, view }) => {
+			const wiki = await WikiService.getWikiBySubdomains(subdomains, view)
 			const { page } = params
-
 			//TODO What if wiki/page doesnt exist?
 			if (!user) return response.redirect('https://fanpedia-project.com/login')
 
@@ -308,7 +315,8 @@ Route.group(() => {
 		}
 	).as('update')
 
-	Route.get('page/:page/revisions', async ({ params, wiki, user, view }) => {
+	Route.get('page/:page/revisions', async ({ params, subdomains, user, view }) => {
+		const wiki = await WikiService.getWikiBySubdomains(subdomains, view)
 		const { page } = params
 		//TODO does page and wiki exist?
 		let isModerator = false
@@ -350,4 +358,4 @@ Route.group(() => {
 })
 	.as('page')
 	.domain(':wiki.fanpedia-project.com')
-	.middleware(['authenticated', 'wiki'])
+	.middleware(['authenticated'])

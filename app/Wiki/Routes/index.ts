@@ -3,6 +3,7 @@ import g from '@ioc:Database/Gremlin'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { process } from 'gremlin'
 import { MapToObjectService } from 'App/Util/Service'
+import WikiService from '../Service/WikiService'
 
 Route.group(() => {
 	Route.get('wiki/create', async ({ user, view, response }) => {
@@ -58,14 +59,14 @@ Route.group(() => {
 		.as('list')
 		.domain('fanpedia-project.com')
 
-	Route.get('/', async ({ view, wiki }) => {
+	Route.get('/', async ({ view, subdomains }) => {
+		const wiki = await WikiService.getWikiBySubdomains(subdomains, view)
 		const pages = await g.V(wiki.id).in_('page_of').elementMap().fold().next()
 		const pagesobj = pages.value.map((p) => MapToObjectService.toObject(p))
 		return view.render('Wiki/show', { pages: pagesobj })
 	})
 		.as('show')
 		.domain(':wiki.fanpedia-project.com')
-		.middleware('wiki')
 })
 	.as('wiki')
 	.middleware('authenticated')
